@@ -15,6 +15,7 @@ public class Main {
             @Override
             public void run() {
                 try {
+                    UIManager.setLookAndFeel( UIManager.getCrossPlatformLookAndFeelClassName());
                     final SturgeonGUI wnd = new SturgeonGUI(Main.getColorConfig());
                     wnd.setVisible(true);
                 } catch (Exception e) {
