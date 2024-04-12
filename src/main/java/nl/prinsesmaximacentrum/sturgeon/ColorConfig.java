@@ -7,7 +7,7 @@ import java.awt.*;
 public class ColorConfig {
 
     @JsonDeserialize(using = ColorDeserializer.class)
-    private Color menu, display, terminal;
+    private Color menu, setup, running, terminal, fileButton, stop;
 
     public Color getMenu() {
         return menu;
@@ -17,12 +17,12 @@ public class ColorConfig {
         this.menu = menu;
     }
 
-    public Color getDisplay() {
-        return display;
+    public Color getSetup() {
+        return setup;
     }
 
-    public void setDisplay(Color display) {
-        this.display = display;
+    public void setSetup(Color setup) {
+        this.setup = setup;
     }
 
     public Color getTerminal() {
@@ -31,5 +31,29 @@ public class ColorConfig {
 
     public void setTerminal(Color terminal) {
         this.terminal = terminal;
+    }
+
+    public Color getFileButton() {
+        return fileButton;
+    }
+
+    public void setFileButton(Color fileButton) {
+        this.fileButton = fileButton;
+    }
+
+    public Color getRunning() {
+        return running;
+    }
+
+    public void setRunning(Color running) {
+        this.running = running;
+    }
+
+    public Color getStop() {
+        return stop;
+    }
+
+    public void setStop(Color stop) {
+        this.stop = stop;
     }
 }

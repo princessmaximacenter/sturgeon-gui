@@ -2,20 +2,23 @@ package nl.prinsesmaximacentrum.sturgeon;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.nio.file.Paths;
 
 import static java.lang.Math.ceil;
 
 public class Menu {
 
-    private JLabel setupLabel, runningLabel;
-    private ImageIcon setupIcon, runningIcon;
-    private JLabel active;
+    private JButton setupButton, runningButton, predictionButton, cnvPlotButton, confidenceButton,
+                    stopButton;
+    private ImageIcon setupIcon, runningIcon, stopIcon;
+    private ColorConfig colorConfig;
 
-    public Menu() {
+    public Menu(ColorConfig colorConfig) {
+        this.colorConfig = colorConfig;
         this.setIcons();
-        this.setLabels();
-        this.setActive(this.setupLabel);
+        this.setButtons();
     }
 
     private void setIcons() {
@@ -26,10 +29,13 @@ public class Menu {
         this.runningIcon = new ImageIcon(
                 Paths.get( relativePath+ "running.png").toAbsolutePath().toString(),
                 "Running");
+        this.stopIcon = new ImageIcon(
+                Paths.get( relativePath+ "stop.png").toAbsolutePath().toString(),
+                "Stop");
     }
 
-    private void setIconSize(JLabel label, ImageIcon imageIcon) {
-        Rectangle size = label.getBounds();
+    private void setIconSize(JButton button, ImageIcon imageIcon) {
+        Rectangle size = button.getBounds();
         if (size.height != 0) {
             Image icon = imageIcon.getImage().getScaledInstance(
                     (int) ceil(size.height * 0.5),
@@ -37,46 +43,89 @@ public class Menu {
                     Image.SCALE_SMOOTH
             );
             imageIcon = new ImageIcon(icon);
-            label.setIcon(imageIcon);
+            button.setIcon(imageIcon);
         }
     }
 
-    private void setLabelFontSizes() {
+    private void setButtonFontSizes() {
         int size;
-        for (JLabel label : new JLabel[] {this.setupLabel, this.runningLabel}) {
-            label.setForeground(Color.LIGHT_GRAY);
-            size = (int) ceil(((float) label.getBounds().height + label.getBounds().width) * 0.07);
-            label.setFont(new Font("Arial",
-                    (this.active == label) ? Font.BOLD : Font.PLAIN,
-                    size));
-            if (this.active == label) {
-                label.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
-            } else {
-                label.setBorder(BorderFactory.createEmptyBorder());
-            }
+        for (JButton button : new JButton[] {setupButton, runningButton, stopButton}) {
+            size = (int) ceil(((float) button.getBounds().height + button.getBounds().width) * 0.07);
+            button.setFont(new Font("Arial", Font.BOLD, size));
+        }
+        for (JButton button : new JButton[] {confidenceButton, cnvPlotButton, predictionButton}) {
+            size = (int) ceil(((float) button.getBounds().height + button.getBounds().width) * 0.07);
+            button.setFont(new Font("Arial", Font.BOLD, (int) ceil(size * 0.8)));
         }
     }
 
     public void setSizes(){
-        this.setIconSize(this.setupLabel, this.setupIcon);
-        this.setIconSize(this.runningLabel, this.runningIcon);
-        this.setLabelFontSizes();
+        this.setIconSize(this.setupButton, this.setupIcon);
+        this.setIconSize(this.runningButton, this.runningIcon);
+        this.setIconSize(this.stopButton, this.stopIcon);
+        this.setButtonFontSizes();
     }
 
-    private void setLabels() {
-        this.setupLabel = new JLabel("  Setup", this.setupIcon, JLabel.LEFT);
-        this.runningLabel = new JLabel("  Running", this.runningIcon, JLabel.LEFT);
+    private void setButtons() {
+        this.setupButton = new JButton("  Setup", this.setupIcon);
+        this.setupButton.setBackground(colorConfig.getSetup());
+        this.runningButton = new JButton("  Start", this.runningIcon);
+        this.confidenceButton = new JButton("      - Confidence");
+        this.predictionButton = new JButton("      - Prediction");
+        this.cnvPlotButton = new JButton("      - CNV plot");
+        this.stopButton = new JButton("  Stop", this.stopIcon);
+        this.stopButton.setBackground(colorConfig.getStop());
+
+        Color color = colorConfig.getRunning();
+        for (JButton button : new JButton[]{runningButton, predictionButton, confidenceButton,
+                cnvPlotButton}) {
+            button.setBackground(color);
+            color = color.darker();
+        }
+
+        for (JButton button : new JButton[]{setupButton, runningButton, confidenceButton, predictionButton,
+                                            cnvPlotButton, stopButton}) {
+            button.setOpaque(true);
+            button.setForeground(Color.white);
+            button.setBorder(BorderFactory.createEmptyBorder());
+            button.setFocusable(false);
+            button.setHorizontalAlignment(SwingConstants.LEFT);
+
+            button.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                }
+            });
+        }
+
+        for (JButton button : new JButton[]{predictionButton, confidenceButton,
+                cnvPlotButton, stopButton}) {
+            button.setEnabled(false);
+        }
     }
 
-    public JLabel getSetupLabel() {
-        return setupLabel;
+    public JButton getSetupButton() {
+        return this.setupButton;
     }
 
-    public JLabel getRunningLabel() {
-        return runningLabel;
+    public JButton getRunningButton() {
+        return runningButton;
     }
 
-    public void setActive(JLabel label) {
-        this.active = label;
+    public JButton getPredictionButton() {
+        return predictionButton;
+    }
+
+    public JButton getCnvPlotButton() {
+        return cnvPlotButton;
+    }
+
+    public JButton getConfidenceButton() {
+        return confidenceButton;
+    }
+
+    public JButton getStopButton() {
+        return stopButton;
     }
 }

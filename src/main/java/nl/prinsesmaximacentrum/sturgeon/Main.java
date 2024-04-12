@@ -1,13 +1,16 @@
 package nl.prinsesmaximacentrum.sturgeon;
 
+import com.apple.eawt.Application;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 
 public class Main {
     public static void main(String[] args) {
@@ -16,7 +19,10 @@ public class Main {
             public void run() {
                 try {
                     UIManager.setLookAndFeel( UIManager.getCrossPlatformLookAndFeelClassName());
-                    final SturgeonGUI wnd = new SturgeonGUI(Main.getColorConfig());
+                    Application application = Application.getApplication();
+                    application.setDockIconImage(Toolkit.getDefaultToolkit().getImage(
+                            Paths.get("src/main/resources/icons/logo.png").toAbsolutePath().toString()));
+                    final SturgeonGUI wnd = new SturgeonGUI(Main.getColorConfig(), Main.getConfig());
                     wnd.setVisible(true);
                 } catch (Exception e) {
                     System.out.println("ERROR:");
@@ -31,5 +37,11 @@ public class Main {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         mapper.findAndRegisterModules();
         return mapper.readValue(new File("src/main/resources/ColorConfig.yml"), ColorConfig.class);
+    }
+
+    private static Config getConfig() throws DatabindException, IOException, StreamReadException {
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        mapper.findAndRegisterModules();
+        return mapper.readValue(new File("src/main/resources/Config.yml"), Config.class);
     }
 }

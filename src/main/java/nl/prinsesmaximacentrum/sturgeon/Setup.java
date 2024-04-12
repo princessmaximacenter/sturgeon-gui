@@ -1,6 +1,7 @@
 package nl.prinsesmaximacentrum.sturgeon;
 
 import javax.swing.*;
+import javax.swing.border.BevelBorder;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -22,9 +23,10 @@ public class Setup {
     private JComboBox<Boolean> classBox;
     private Biomaterial biomaterial = new Biomaterial();
     private final double labelMultiplier = 0.01, titleMultiplier = 0.03, subtitleMultiplier = 0.015;
-//    private final double
+    private ColorConfig colorConfig;
 
-    public Setup() {
+    public Setup(ColorConfig colorConfig) {
+        this.colorConfig = colorConfig;
         this.setLabels();
         this.setButtons();
         this.setTextFields();
@@ -90,7 +92,7 @@ public class Setup {
         this.configButton = new JButton("<html>Choose<p class=config>File</html>");
 
         for (JButton button : new JButton[]{inputButton, outputButton, configButton}) {
-            button.setBackground(Color.yellow);
+            button.setBackground(colorConfig.getFileButton());
             button.setOpaque(true);
 
             button.addMouseListener(new MouseAdapter() {
@@ -157,11 +159,14 @@ public class Setup {
     }
 
     private void setComboBoxes() {
-        this.iterBox = new JComboBox<>(new Integer[]{1,2,3,4,5,6,7,8,9,10});
-        this.iterBox.setSelectedIndex(4);
-
         this.classBox = new JComboBox<>(new Boolean[]{true, false});
         this.classBox.setSelectedIndex(0);
+        this.classBox.setBackground(Color.white);
+
+        this.iterBox = new JComboBox<>(new Integer[]{1,2,3,4,5,6,7,8,9,10});
+        this.iterBox.setSelectedIndex(4);
+        this.iterBox.setBackground(Color.white);
+
     }
 
     public void setSizes(Rectangle size) {
@@ -231,13 +236,15 @@ public class Setup {
     private void setButtonSizes(Rectangle size) {
         double fontSize = (double) size.height + size.width;
         for (JButton button : new JButton[]{inputButton, outputButton, configButton}) {
+            button.setFocusable(false);
             button.setPreferredSize(new Dimension(
                     (int) ceil(size.width * 0.1),
-                    (int) ceil(size.height * 0.15)
+                    (int) ceil(size.height * 0.09)
             ));
             button.setFont(new Font("Arial", Font.BOLD,
                     (int) ceil(fontSize * labelMultiplier * 0.8)
             ));
+            button.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
         }
     }
 
@@ -266,5 +273,105 @@ public class Setup {
             }
         }
         return true;
+    }
+
+    public JLabel getTitleLabel() {
+        return titleLabel;
+    }
+
+    public JLabel getInputLabel() {
+        return inputLabel;
+    }
+
+    public JLabel getOutputLabel() {
+        return outputLabel;
+    }
+
+    public JLabel getBarcodeLabel() {
+        return barcodeLabel;
+    }
+
+    public JLabel getBmLabel() {
+        return bmLabel;
+    }
+
+    public JLabel getClassLabel() {
+        return classLabel;
+    }
+
+    public JLabel getIterLabel() {
+        return iterLabel;
+    }
+
+    public JLabel getConfigLabel() {
+        return configLabel;
+    }
+
+    public JLabel getAdvancedLabel() {
+        return advancedLabel;
+    }
+
+    public JLabel getEmptyBarcodeLabel() {
+        return emptyBarcodeLabel;
+    }
+
+    public JLabel getEmptyBmLabel() {
+        return emptyBmLabel;
+    }
+
+    public JButton getInputButton() {
+        return inputButton;
+    }
+
+    public JButton getOutputButton() {
+        return outputButton;
+    }
+
+    public JButton getConfigButton() {
+        return configButton;
+    }
+
+    public JTextField getInputField() {
+        return inputField;
+    }
+
+    public JTextField getOutputField() {
+        return outputField;
+    }
+
+    public JTextField getBmField() {
+        return bmField;
+    }
+
+    public JTextField getBarcodeField() {
+        return barcodeField;
+    }
+
+    public JTextField getConfigField() {
+        return configField;
+    }
+
+    public JComboBox<Integer> getIterBox() {
+        return iterBox;
+    }
+
+    public JComboBox<Boolean> getClassBox() {
+        return classBox;
+    }
+
+    public Biomaterial getBiomaterial() {
+        return biomaterial;
+    }
+
+    public double getLabelMultiplier() {
+        return labelMultiplier;
+    }
+
+    public double getTitleMultiplier() {
+        return titleMultiplier;
+    }
+
+    public double getSubtitleMultiplier() {
+        return subtitleMultiplier;
     }
 }
