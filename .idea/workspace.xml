@@ -4,19 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f93c3ae9-7d98-4a53-bdd0-e9713d67c61d" name="Changes" comment="made setup page">
-      <change afterPath="$PROJECT_DIR$/src/main/java/nl/prinsesmaximacentrum/sturgeon/Config.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/nl/prinsesmaximacentrum/sturgeon/Running.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/Config.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/icons/logo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/icons/stop.png" afterDir="false" />
+    <list default="true" id="f93c3ae9-7d98-4a53-bdd0-e9713d67c61d" name="Changes" comment="made running page">
+      <change afterPath="$PROJECT_DIR$/src/main/java/nl/prinsesmaximacentrum/sturgeon/TSVTable.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/nl/prinsesmaximacentrum/sturgeon/ColorConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/nl/prinsesmaximacentrum/sturgeon/ColorConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/nl/prinsesmaximacentrum/sturgeon/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/nl/prinsesmaximacentrum/sturgeon/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/nl/prinsesmaximacentrum/sturgeon/Menu.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/nl/prinsesmaximacentrum/sturgeon/Menu.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/nl/prinsesmaximacentrum/sturgeon/Running.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/nl/prinsesmaximacentrum/sturgeon/Running.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/nl/prinsesmaximacentrum/sturgeon/Setup.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/nl/prinsesmaximacentrum/sturgeon/Setup.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/nl/prinsesmaximacentrum/sturgeon/SturgeonGUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/nl/prinsesmaximacentrum/sturgeon/SturgeonGUI.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/ColorConfig.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/ColorConfig.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/Config.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/Config.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -103,12 +97,21 @@
       <option name="project" value="LOCAL" />
       <updated>1712776008495</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="made running page">
+      <option name="closed" value="true" />
+      <created>1712933052550</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1712933052550</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="skeleton creation" />
     <MESSAGE value="made setup page" />
-    <option name="LAST_COMMIT_MESSAGE" value="made setup page" />
+    <MESSAGE value="made running page" />
+    <option name="LAST_COMMIT_MESSAGE" value="made running page" />
   </component>
 </project>

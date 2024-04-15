@@ -72,14 +72,14 @@ public class Setup {
         this.barcodeLabel = new JLabel("Used barcode", JTextField.RIGHT);
         this.bmLabel = new JLabel("Biomaterial ID", JTextField.RIGHT);
         this.classLabel = new JLabel("Use unclassified barcodes?", JTextField.RIGHT);
-        this.iterLabel = new JLabel("Number of iterations before new CNV", JTextField.RIGHT);
+        this.iterLabel = new JLabel("<HTML>Number of iterations<p>before new CNV</HTML>", JTextField.RIGHT);
         this.configLabel = new JLabel("Config file", JTextField.RIGHT);
         this.advancedLabel = new JLabel("------Advanced options------", JTextField.CENTER);
         this.emptyBarcodeLabel = new JLabel();
         this.emptyBmLabel = new JLabel();
 
         for (JLabel label : new JLabel[]{titleLabel, inputLabel, outputLabel, barcodeLabel, bmLabel, classLabel,
-                iterLabel, configLabel, advancedLabel}) {
+                iterLabel, configLabel, advancedLabel, emptyBarcodeLabel, emptyBmLabel}) {
             label.setForeground(Color.LIGHT_GRAY);
 //            label.setBorder(BorderFactory.createLineBorder(Color.RED, 3));
         }
@@ -181,7 +181,7 @@ public class Setup {
         for (JLabel label : new JLabel[]{inputLabel, outputLabel, barcodeLabel, bmLabel, configLabel,
                                          classLabel, iterLabel}) {
             label.setPreferredSize(new Dimension(
-                    (int) ceil(size.width * 0.15),
+                    (int) ceil(size.width * 0.16),
                     (int) ceil(size.height * 0.2)
             ));
             label.setFont(new Font("Arial", Font.BOLD,
@@ -190,7 +190,7 @@ public class Setup {
         }
         for (JLabel label : new JLabel[]{classLabel, iterLabel}) {
             label.setPreferredSize(new Dimension(
-                    (int) ceil(size.width * 0.34),
+                    (int) ceil(size.width * 0.25),
                     (int) ceil(size.height * 0.2)
             ));
         }
@@ -210,7 +210,7 @@ public class Setup {
         ));
 
         advancedLabel.setPreferredSize(new Dimension(
-                (int) ceil(size.width * 0.45),
+                (int) ceil(size.width * 0.40),
                 (int) ceil(size.height * 0.10)
         ));
         advancedLabel.setFont(new Font("Arial", Font.BOLD,
@@ -224,7 +224,7 @@ public class Setup {
         double fontSize = (double) size.height + size.width;
         for (JTextField field : new JTextField[]{inputField, outputField, bmField, barcodeField, configField}) {
             field.setPreferredSize(new Dimension(
-                    (int) ceil(size.width * 0.2),
+                    (int) ceil(size.width * 0.15),
                     (int) ceil(size.height * 0.1)
             ));
             field.setFont(new Font("Arial", Font.PLAIN,

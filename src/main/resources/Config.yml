@@ -1,4 +1,4 @@
 cnvPlot: "CNV_plot_iteration_0.png"
 confidencePlot: "confidence_over_time_plot_iteration_0.png"
-confidenceTable: "classifier_progress_iteration_0.txt"
+confidenceTable: "classifier_progress_iteration_0.tsv"
 predictPlot: "merged_probes_methyl_calls_model_iteration_0.png"

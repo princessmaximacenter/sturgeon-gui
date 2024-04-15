@@ -61,7 +61,7 @@ public class Running {
     public void run() {
         try {
             ProcessBuilder pb = new ProcessBuilder();
-            pb.command("/bin/bash", "-c", "echo finished iteration_1;");
+            pb.command("/bin/bash", "-c", "echo Running iteration_1;");
             Process proc = pb.start();
 
             Thread outputReader = new Thread(() -> {
@@ -77,12 +77,14 @@ public class Running {
                     }
                     this.log("Finished!");
                 } catch (IOException e) {
+                    e.printStackTrace();
                     this.log("ERROR: " + e.getMessage());
                 }
             });
             outputReader.start();
 
         } catch (IOException e) {
+            e.printStackTrace();
             this.log("ERROR: " + e.getMessage());
         }
 
@@ -120,7 +122,7 @@ public class Running {
             }
             this.setActionButtons(this.menu.getConfidenceButton(),
                     confidenceTitle + iteration,
-                    new String[]{this.confidencePlotPath});
+                    new String[]{this.confidenceTablePath, this.confidencePlotPath});
         } else if (Objects.equals(resultObject, "predictPlot")) {
             this.predictPlotPath = resultPath;
             this.setActionButtons(this.menu.getPredictionButton(),
@@ -142,7 +144,7 @@ public class Running {
                 Running.this.displayPanel.setBackground(button.getBackground());
                 Running.this.titleField.setBackground(button.getBackground());
                 Running.this.showPlots(title, plotPaths);
-                Running.this.setSizes();
+                Running.this.setSizes(Running.this.displayPanel.getBounds());
                 Running.this.displayPanel.repaint();
                 Running.this.displayPanel.revalidate();
             }
@@ -155,23 +157,28 @@ public class Running {
         displayPanel.add(titleField);
         try {
             for (String plotPath : plotPaths) {
-                System.out.println(plotPath);
-                BufferedImage plotImage = ImageIO.read(new File(plotPath));
-                JLabel plotLabel = new JLabel(new ImageIcon(plotImage));
-                displayPanel.add(plotLabel);
+                if (plotPath.endsWith(".tsv")) {
+                    TSVTable table = new TSVTable(plotPath);
+                    displayPanel.add(table.getScrollPane());
+                } else {
+                    System.out.println(plotPath);
+                    BufferedImage plotImage = ImageIO.read(new File(plotPath));
+                    JLabel plotLabel = new JLabel(new ImageIcon(plotImage));
+                    displayPanel.add(plotLabel);
+                }
             }
         } catch (IOException e) {
+            e.printStackTrace();
             System.err.println("ERROR: " + e.getMessage());
         }
     }
 
-    public void setSizes() {
-        Rectangle size = displayPanel.getBounds();
+    public void setSizes(Rectangle size) {
         Component[] components = displayPanel.getComponents();
         boolean isPrediction = false;
         int counter = 0;
         for (Component component : components) {
-            if (component instanceof JLabel) {
+            if (component instanceof JLabel || component instanceof JScrollPane) {
                 counter++;
             } else if (component instanceof JTextField) {
                 component.setPreferredSize(new Dimension(
@@ -186,7 +193,7 @@ public class Running {
         int width, height;
         if (counter != 0) {
             for (Component component : components) {
-                if (component instanceof JLabel) {
+                if (component instanceof JLabel || component instanceof JScrollPane) {
                     if (isPrediction) {
                         width = (int) ceil(size.width * 0.95);
                         height = (int) ceil(size.height * 0.85);
@@ -194,12 +201,15 @@ public class Running {
                         if (counter == 1) {
                             counter = 2;
                         }
-                        width = (int) ceil(size.width * ((double) 1 / counter));
+                        width = (int) ceil(size.width * ((double) 1 / (counter * 1.1)));
                         height = width;
                     }
 
                     component.setPreferredSize(new Dimension(width, height));
-                    this.setIconSize((JLabel) component, width, height);
+
+                    if (component instanceof JLabel) {
+                        this.setIconSize((JLabel) component, width, height);
+                    }
                 }
             }
         }
