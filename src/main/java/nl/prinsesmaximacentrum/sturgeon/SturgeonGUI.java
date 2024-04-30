@@ -4,7 +4,10 @@ import javax.swing.*;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.Objects;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 import static java.lang.Math.ceil;
 import static java.lang.Math.floor;
@@ -21,11 +24,15 @@ public class SturgeonGUI extends JFrame {
     private Running running;
     private final int SETUP = 0, RUNNING = 1;
     private int activeScreen = 0;
+    private String logPath;
 
-    public SturgeonGUI(ColorConfig colorConfig, Config config) {
-        super("Sturgeon");
+    public SturgeonGUI(ColorConfig colorConfig, Config config, String logPath) {
+        super();
         this.colorConfig = colorConfig;
         this.config = config;
+        this.logPath = logPath;
+        this.addToLog("Current user: " + System.getProperty("user.name"));
+        this.setTitle("Sturgeon v" + this.config.getVersion());
         this.setClosure();
         this.setWindow();
         this.buildGUI();
@@ -59,7 +66,6 @@ public class SturgeonGUI extends JFrame {
     }
 
     private void buildGUI() {
-
         this.menuPanel = new JPanel(new GridLayout(6,1));
         this.menuPanel.setBackground(this.colorConfig.getMenu());
         this.window.add(menuPanel, BorderLayout.WEST);
@@ -93,6 +99,16 @@ public class SturgeonGUI extends JFrame {
         this.setRunningClick(runningButton);
     }
 
+    private void setStopClick(JButton stopButton) {
+        stopButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                ProcessBuilder pb = new ProcessBuilder();
+                pb.command("touch",  "/wrapper_stop.txt");
+            }
+        });
+    }
+
     private void setRunningClick(JButton runningButton) {
         runningButton.addMouseListener(new MouseAdapter() {
             @Override
@@ -109,19 +125,23 @@ public class SturgeonGUI extends JFrame {
                                 setupOptions.getOutputField().getText(),
                                 setupOptions.getBarcodeField().getText(),
                                 setupOptions.getBiomaterial().getBm(),
-                                setupOptions.getConfigField().getText(),
+                                setupOptions.getModelField().getText(),
                                 (boolean) setupOptions.getClassBox().getSelectedItem(),
                                 (int) setupOptions.getIterBox().getSelectedItem(),
-                                log, SturgeonGUI.this.displayPanel, SturgeonGUI.this.config, menuItems);
+                                log, SturgeonGUI.this.displayPanel, SturgeonGUI.this.config, menuItems, colorConfig);
                         running.run();
                         SturgeonGUI.this.setSizes();
+                        SturgeonGUI.this.running.showProcess();
                     } catch (NullPointerException err) {
-                        System.err.println("Error:" + err.getMessage());
+                        System.err.println("Error: " + err.getMessage());
                     }
                 } else {
                     if (SturgeonGUI.this.activeScreen == SturgeonGUI.this.SETUP) {
                         log.setText(log.getText() + "\n> Validation of the setup has failed!\n" +
-                                "Make sure you filled in everything and have given a correct biomaterial ID.");
+                                "Make sure you filled in everything, the output folder is empty and " +
+                                "you have given a correct biomaterial ID.");
+                    } else {
+                        SturgeonGUI.this.running.showProcess();
                     }
                 }
             }
@@ -138,25 +158,16 @@ public class SturgeonGUI extends JFrame {
 
     private void setWorkSubPanels() {
         this.displayPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-//        GridBagConstraints actionConstraints = new GridBagConstraints();
-//        actionConstraints.gridx = 0;
-//        actionConstraints.gridy = 0;
-//        actionConstraints.weightx = 1.0; // Expand horizontally
-//        actionConstraints.weighty = 0.8; // 80% of vertical space
-//        actionConstraints.fill = GridBagConstraints.BOTH;
-        this.setupOptions = new Setup(colorConfig);
+        this.setupOptions = new Setup(colorConfig, config);
         this.showSetup();
         this.workPanel.add(displayPanel);
 
-        this.terminalArea = new JTextArea("> Welcome to Sturgeon! Please fill in the setup page.");
+        this.terminalArea = new JTextArea("> Welcome to Sturgeon GUI v" + config.getVersion() +
+                "\n> Contact " + config.getDevMail() + " if you have any questions/feedback.\n> " +
+                "Please fill in the setup page to get started.");
         this.terminalArea.setBackground(this.colorConfig.getTerminal());
         this.terminalArea.setForeground(Color.GREEN);
-//        GridBagConstraints progressConstraints = new GridBagConstraints();
-//        progressConstraints.gridx = 0;
-//        progressConstraints.gridy = 1;
-//        progressConstraints.weightx = 1.0; // Expand horizontally
-//        progressConstraints.weighty = 0.199999; // 20% of vertical space
-//        progressConstraints.fill = GridBagConstraints.BOTH;
+
         JScrollPane scroll = new JScrollPane(this.terminalArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scroll.setBorder(BorderFactory.createEmptyBorder());
@@ -165,7 +176,6 @@ public class SturgeonGUI extends JFrame {
 
     private void setSizes() {
         Rectangle size = this.window.getBounds();
-
         this.menuPanel.setPreferredSize(new Dimension(
                 (int) floor(size.width * 0.15),
                 size.height
@@ -211,5 +221,14 @@ public class SturgeonGUI extends JFrame {
 
     private void setActiveScreen(int screen) {
         this.activeScreen = screen;
+    }
+
+    private void addToLog(String msg) {
+        try (FileWriter fileWriter = new FileWriter(this.logPath)) {
+            fileWriter.write(new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss| ").format(Calendar.getInstance().getTime()) + msg);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("ERROR: " + e.getMessage());
+        }
     }
 }

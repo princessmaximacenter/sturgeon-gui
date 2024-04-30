@@ -11,6 +11,8 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 public class Main {
     public static void main(String[] args) {
@@ -22,7 +24,7 @@ public class Main {
                     Application application = Application.getApplication();
                     application.setDockIconImage(Toolkit.getDefaultToolkit().getImage(
                             Paths.get("src/main/resources/icons/logo.png").toAbsolutePath().toString()));
-                    final SturgeonGUI wnd = new SturgeonGUI(Main.getColorConfig(), Main.getConfig());
+                    final SturgeonGUI wnd = new SturgeonGUI(Main.getColorConfig(), Main.getConfig(), Main.getLogFile());
                     wnd.setVisible(true);
                 } catch (Exception e) {
                     System.out.println("ERROR:");
@@ -43,5 +45,12 @@ public class Main {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         mapper.findAndRegisterModules();
         return mapper.readValue(new File("src/main/resources/Config.yml"), Config.class);
+    }
+
+    private static String getLogFile() throws IOException {
+       File file = new File("src/main/resources/logs/log_" +
+               new SimpleDateFormat("yyMMdd_HHmmss").format(Calendar.getInstance().getTime()) + ".txt");
+       file.createNewFile();
+       return file.getAbsolutePath();
     }
 }

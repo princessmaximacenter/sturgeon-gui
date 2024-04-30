@@ -2,14 +2,13 @@ package nl.prinsesmaximacentrum.sturgeon;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.border.BevelBorder;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -17,38 +16,46 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.lang.Math.ceil;
+import static java.lang.Math.floor;
 
 public class Running {
 
-    private String inputFolder, outputFolder, barcode, biomaterial, configFile;
+    private String inputFolder, outputFolder, barcode, biomaterial, modelFile;
     private boolean useUnclass;
-    private int numberInterations;
-    private JPanel displayPanel;
+    private int numberInterations, currentIteration = 0;
+    private JPanel displayPanel, processPanel;
     private JTextComponent logComponent;
     private JTextField titleField;
+    private JLabel startBox, endBox, confBox, cnvBox, predBox, guppyBox, waitBox,
+            startLabel, endLabel, confLabel, cnvLabel, predLabel, guppyLabel, waitLabel;
+    private JLabel[] flagOrder;
+    private JButton outputButton;
     private Pattern iterPattern = Pattern.compile("iteration_[0-9]+");
     private String predictPlotPath = "", confidencePlotPath = "", confidenceTablePath = "", cnvPlotPath = "";
     private final String predictTile = "Prediction of Iteration ", confidenceTitle = "Confidence of Iteration ",
                          cnvTitle = "CNV Plot Iteration ";
     private Config config;
+    private ColorConfig colorConfig;
     private Menu menu;
 
     public Running(String inputFolder, String outputFolder, String barcode,
-                   String biomaterial, String configFile, boolean useUnclass,
+                   String biomaterial, String modelFile, boolean useUnclass,
                    int numberInterations, JTextComponent logComponent,
-                   JPanel displayPanel, Config config, Menu menu) {
+                   JPanel displayPanel, Config config, Menu menu, ColorConfig colorConfig) {
         this.config = config;
+        this.colorConfig = colorConfig;
         this.menu = menu;
         this.inputFolder = inputFolder;
         this.outputFolder = outputFolder;
         this.barcode = barcode;
         this.biomaterial = biomaterial;
-        this.configFile = configFile;
+        this.modelFile = modelFile;
         this.useUnclass = useUnclass;
         this.numberInterations = numberInterations;
         this.logComponent = logComponent;
         this.displayPanel = displayPanel;
         this.setTextFields();
+        this.setProcessElements();
     }
 
     private void setTextFields() {
@@ -58,10 +65,85 @@ public class Running {
 
     }
 
+    private void setProcessElements() {
+        this.processPanel = new JPanel(new FlowLayout());
+        processPanel.setBackground(menu.getRunningButton().getBackground());
+
+        this.startBox = new JLabel();
+        this.endBox = new JLabel();
+        this.predBox = new JLabel();
+        this.guppyBox = new JLabel();
+        this.cnvBox = new JLabel();
+        this.confBox = new JLabel();
+        this.waitBox = new JLabel();
+
+        this.flagOrder = new JLabel[]{startBox, waitBox, guppyBox, predBox, confBox, cnvBox, endBox};
+        
+        this.startLabel = new JLabel("Starting iteration");
+        this.endLabel = new JLabel("Finishing iteration");
+        this.predLabel = new JLabel("Making predictions");
+        this.guppyLabel = new JLabel("Running Guppy");
+        this.cnvLabel = new JLabel("Making CNV plot");
+        this.confLabel = new JLabel("Making confidence plot");
+        this.waitLabel = new JLabel("Waiting for new/complete file");
+
+        this.outputButton = new JButton("Open result folder");
+        this.outputButton.setBackground(colorConfig.getFileButton());
+        this.outputButton.setOpaque(true);
+        this.outputButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                System.out.println(1);
+                if (Desktop.isDesktopSupported()) {
+                    try {
+                        Desktop.getDesktop().open(new File(outputFolder));
+                    } catch (IOException err) {
+                        Running.this.log("ERROR: Failed to open " + outputFolder);
+                    }
+                }
+            }
+        });
+
+        this.processPanel.add(titleField);
+        this.processPanel.add(startBox);
+        this.processPanel.add(startLabel);
+        this.processPanel.add(waitBox);
+        this.processPanel.add(waitLabel);
+        this.processPanel.add(guppyBox);
+        this.processPanel.add(guppyLabel);
+        this.processPanel.add(predBox);
+        this.processPanel.add(predLabel);
+        this.processPanel.add(confBox);
+        this.processPanel.add(confLabel);
+        this.processPanel.add(cnvBox);
+        this.processPanel.add(cnvLabel);
+        this.processPanel.add(endBox);
+        this.processPanel.add(endLabel);
+        this.processPanel.add(outputButton);
+    }
+
+    public void showProcess() {
+        displayPanel.removeAll();
+        String title = "Progress Iteration " + currentIteration;
+        if (currentIteration == 0) {
+            title = "Waiting for the first iteration";
+        }
+        titleField.setText(title);
+        displayPanel.add(processPanel);
+        displayPanel.revalidate();
+        displayPanel.repaint();
+    }
+
     public void run() {
         try {
             ProcessBuilder pb = new ProcessBuilder();
-            pb.command("/bin/bash", "-c", "echo Running iteration_1;");
+            pb.command("docker", " run -it --rm --gpus all -v " + inputFolder + ":/home/docker/input " +
+                    "-v " + outputFolder + ":/home/docker/output " +
+                    "-v " + config.getRefGenome() + ":/home/docker/refGenome/ " +
+                    "-v " + modelFile + ":/opt/sturgeon/sturgeon/include/models/model.zip " +
+                    "-v " + config.getWrapperFlagDir() + ":/home/docker/wrapper/" +
+                    config.getExtraArgs() +
+                    config.getSturgeonImage() + " " + config.getWrapperScript());
             Process proc = pb.start();
 
             Thread outputReader = new Thread(() -> {
@@ -70,9 +152,15 @@ public class Running {
                     String responseLine;
                     while ((responseLine = reader.readLine()) != null) {
                         this.log(responseLine);
-                        Matcher matcher = iterPattern.matcher(responseLine);
-                        if (matcher.find()) {
-                            checkNewResults(matcher.group(0));
+                        if (responseLine.contains("FLAG")) {
+                            System.out.println(responseLine);
+                            this.setFlag(responseLine);
+                            Matcher matcher = iterPattern.matcher(responseLine);
+                            if (matcher.find()) {
+                                String iteration = matcher.group(0);
+                                this.setCurrentIteration(iteration);
+                                checkNewResults(iteration);
+                            }
                         }
                     }
                     this.log("Finished!");
@@ -88,6 +176,30 @@ public class Running {
             this.log("ERROR: " + e.getMessage());
         }
 
+    }
+
+    private void setFlag(String flagText) {
+        boolean flagSet = false;
+        for (JLabel box : this.flagOrder) {
+            if ((flagText.contains("starting processing") && Objects.equals(box, startBox)) ||
+                (flagText.contains("completed") && Objects.equals(box, endBox)) ||
+                (flagText.contains("confidence") && Objects.equals(box, confBox)) ||
+                (flagText.contains("CNV") && Objects.equals(box, cnvBox)) ||
+                (flagText.contains("sturgeon") && Objects.equals(box, predBox))) {
+                box.setBackground(Color.blue);
+                flagSet = true;
+            } else {
+                if (flagSet) {
+                    if (currentIteration % numberInterations != 0 && Objects.equals(box, cnvBox)){
+                        box.setBackground(Color.lightGray);
+                    } else {
+                        box.setBackground(Color.white);
+                    }
+                } else {
+                    box.setBackground(Color.green);
+                }
+            }
+        }
     }
 
     private void checkNewResults(String iteration) {
@@ -110,9 +222,13 @@ public class Running {
         }
     }
 
-    private void setResultPath(String resultObject, String resultPath, String iteration) {
+    private void setCurrentIteration(String iteration) {
         String[] iterationSplit = iteration.split("_");
         iteration = iterationSplit[iterationSplit.length - 1];
+        this.currentIteration = Integer.parseInt(iteration);
+    }
+
+    private void setResultPath(String resultObject, String resultPath, String iteration) {
 
         if (Objects.equals(resultObject, "confidencePlot") | Objects.equals(resultObject, "confidenceTable")) {
             if (Objects.equals(resultObject, "confidencePlot")) {
@@ -173,7 +289,7 @@ public class Running {
         }
     }
 
-    public void setSizes(Rectangle size) {
+    private void setResultSizes(Rectangle size) {
         Component[] components = displayPanel.getComponents();
         boolean isPrediction = false;
         int counter = 0;
@@ -213,6 +329,45 @@ public class Running {
                 }
             }
         }
+    }
+
+    private void setProcessSizes(Rectangle size) {
+        Rectangle panelSize = new Rectangle((int) floor((double) size.width / 2), size.height);
+        processPanel.setPreferredSize(new Dimension(
+                panelSize.width,
+                panelSize.height
+        ));
+
+
+        int boxSize = (int) floor((double) panelSize.width * 0.1);
+        int borderSize = (int) ceil((double) boxSize / 20);
+        for(JLabel box: new JLabel[]{startBox, endBox, confBox, cnvBox, predBox, guppyBox, waitBox}){
+            box.setPreferredSize(new Dimension(boxSize, boxSize));
+            box.setBorder(BorderFactory.createLineBorder(Color.black, borderSize));
+            box.setOpaque(true);
+        }
+        int labelSize = (int) ceil((double) panelSize.width * 0.85);
+        for(JLabel label: new JLabel[]{startLabel, endLabel, confLabel, cnvLabel, predLabel, guppyLabel, waitLabel}){
+            label.setPreferredSize(new Dimension(labelSize, boxSize));
+            label.setFont(new Font("Arial", Font.PLAIN, (int) ceil((double) boxSize * 0.5)));
+            label.setBackground(menu.getRunningButton().getBackground());
+            label.setForeground(Color.black);
+            if (Objects.equals(label, cnvLabel) && currentIteration % numberInterations != 0) {
+                label.setForeground(Color.lightGray);
+            }
+            label.setOpaque(true);
+        }
+        titleField.setPreferredSize(new Dimension(panelSize.width, (int) floor((double) panelSize.height * 0.1)));
+        titleField.setFont(new Font("Arial", Font.BOLD, (int) ceil((double) boxSize * 0.7)));
+        titleField.setBackground(menu.getRunningButton().getBackground());
+        outputButton.setPreferredSize(new Dimension((int) ceil((double) labelSize * 0.5), boxSize));
+        outputButton.setFont(new Font("Arial", Font.PLAIN, (int) ceil((double) boxSize * 0.4)));
+        outputButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+    }
+
+    public void setSizes(Rectangle size) {
+        this.setResultSizes(size);
+        this.setProcessSizes(size);
     }
 
     private void setIconSize(JLabel label, int width, int height) {

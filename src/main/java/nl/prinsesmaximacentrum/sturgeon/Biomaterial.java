@@ -18,6 +18,7 @@ public class Biomaterial {
     }
 
     public void setBm(String bm) {
+        System.out.println("bm: " + bm);
         this.bm = (this.isBmValid(bm)) ? bm : "";
     }
 }

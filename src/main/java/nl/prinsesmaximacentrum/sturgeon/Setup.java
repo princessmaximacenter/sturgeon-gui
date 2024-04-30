@@ -2,31 +2,34 @@ package nl.prinsesmaximacentrum.sturgeon;
 
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Objects;
 
 import static java.lang.Math.ceil;
 
 public class Setup {
 
-    private JLabel titleLabel, inputLabel, outputLabel, barcodeLabel, bmLabel, classLabel, iterLabel, configLabel,
+    private JLabel titleLabel, inputLabel, outputLabel, barcodeLabel, bmLabel, classLabel, iterLabel, modelLabel,
             advancedLabel, emptyBarcodeLabel, emptyBmLabel;
-    private JButton inputButton, outputButton, configButton;
-    private JTextField inputField, outputField, bmField, barcodeField, configField;
+    private JButton inputButton, outputButton, modelButton;
+    private JTextField inputField, outputField, bmField, barcodeField, modelField;
     private JComboBox<Integer> iterBox;
     private JComboBox<Boolean> classBox;
     private Biomaterial biomaterial = new Biomaterial();
     private final double labelMultiplier = 0.01, titleMultiplier = 0.03, subtitleMultiplier = 0.015;
     private ColorConfig colorConfig;
+    private Config config;
 
-    public Setup(ColorConfig colorConfig) {
+    public Setup(ColorConfig colorConfig, Config config) {
         this.colorConfig = colorConfig;
+        this.config = config;
         this.setLabels();
         this.setButtons();
         this.setTextFields();
@@ -60,9 +63,10 @@ public class Setup {
         container.add(bmField);
         container.add(emptyBmLabel);
 
-        container.add(configLabel);
-        container.add(configField);
-        container.add(configButton);
+        container.add(modelLabel);
+        container.add(modelField);
+        container.add(modelButton);
+
     }
 
     private void setLabels() {
@@ -73,13 +77,13 @@ public class Setup {
         this.bmLabel = new JLabel("Biomaterial ID", JTextField.RIGHT);
         this.classLabel = new JLabel("Use unclassified barcodes?", JTextField.RIGHT);
         this.iterLabel = new JLabel("<HTML>Number of iterations<p>before new CNV</HTML>", JTextField.RIGHT);
-        this.configLabel = new JLabel("Config file", JTextField.RIGHT);
+        this.modelLabel = new JLabel("Prediction Model", JTextField.RIGHT);
         this.advancedLabel = new JLabel("------Advanced options------", JTextField.CENTER);
         this.emptyBarcodeLabel = new JLabel();
         this.emptyBmLabel = new JLabel();
 
         for (JLabel label : new JLabel[]{titleLabel, inputLabel, outputLabel, barcodeLabel, bmLabel, classLabel,
-                iterLabel, configLabel, advancedLabel, emptyBarcodeLabel, emptyBmLabel}) {
+                iterLabel, modelLabel, advancedLabel, emptyBarcodeLabel, emptyBmLabel}) {
             label.setForeground(Color.LIGHT_GRAY);
 //            label.setBorder(BorderFactory.createLineBorder(Color.RED, 3));
         }
@@ -89,9 +93,9 @@ public class Setup {
         // Using HTML to create a newline and adds a tag to know which field need to have the outcome of the button
         this.inputButton = new JButton("<html>Choose<p class=input>Folder</html>");
         this.outputButton = new JButton("<html>Choose<p class=output>Folder</html>");
-        this.configButton = new JButton("<html>Choose<p class=config>File</html>");
+        this.modelButton = new JButton("<html>Choose<p class=config>File</html>");
 
-        for (JButton button : new JButton[]{inputButton, outputButton, configButton}) {
+        for (JButton button : new JButton[]{inputButton, outputButton, modelButton}) {
             button.setBackground(colorConfig.getFileButton());
             button.setOpaque(true);
 
@@ -118,7 +122,7 @@ public class Setup {
         } else if (key.contains("class=output")) {
             return outputField;
         } else {
-            return configField;
+            return modelField;
         }
     }
 
@@ -127,9 +131,9 @@ public class Setup {
         this.outputField = new JTextField();
         this.bmField = new JTextField();
         this.barcodeField = new JTextField();
-        this.configField = new JTextField();
+        this.modelField = new JTextField(config.getModel());
 
-        for (JTextField textField : new JTextField[]{inputField, outputField, configField}){
+        for (JTextField textField : new JTextField[]{inputField, outputField, modelField}){
             textField.setHorizontalAlignment(SwingConstants.LEFT);
         }
         for (JTextField textField : new JTextField[]{bmField, barcodeField}){
@@ -178,7 +182,7 @@ public class Setup {
 
     private void setLabelSizes(Rectangle size){
         double fontSize = (double) size.height + size.width;
-        for (JLabel label : new JLabel[]{inputLabel, outputLabel, barcodeLabel, bmLabel, configLabel,
+        for (JLabel label : new JLabel[]{inputLabel, outputLabel, barcodeLabel, bmLabel, modelLabel,
                                          classLabel, iterLabel}) {
             label.setPreferredSize(new Dimension(
                     (int) ceil(size.width * 0.16),
@@ -222,7 +226,7 @@ public class Setup {
 
     private void setFieldSizes(Rectangle size) {
         double fontSize = (double) size.height + size.width;
-        for (JTextField field : new JTextField[]{inputField, outputField, bmField, barcodeField, configField}) {
+        for (JTextField field : new JTextField[]{inputField, outputField, bmField, barcodeField, modelField}) {
             field.setPreferredSize(new Dimension(
                     (int) ceil(size.width * 0.15),
                     (int) ceil(size.height * 0.1)
@@ -235,7 +239,7 @@ public class Setup {
 
     private void setButtonSizes(Rectangle size) {
         double fontSize = (double) size.height + size.width;
-        for (JButton button : new JButton[]{inputButton, outputButton, configButton}) {
+        for (JButton button : new JButton[]{inputButton, outputButton, modelButton}) {
             button.setFocusable(false);
             button.setPreferredSize(new Dimension(
                     (int) ceil(size.width * 0.1),
@@ -267,12 +271,17 @@ public class Setup {
 
     public boolean validateSetup() {
         for (String checkStr : new String[]{getBiomaterialID(), barcodeField.getText(), inputField.getText(),
-                                            outputField.getText(), configField.getText()}) {
+                                            outputField.getText(), modelField.getText()}) {
             if (Objects.equals(checkStr, "")) {
                 return false;
             }
         }
-        return true;
+        try {
+            return biomaterial.isBmValid(biomaterial.getBm()) &&
+                    !Files.list(Paths.get(outputField.getText())).findAny().isPresent();
+        } catch (IOException e ) {
+            return false;
+        }
     }
 
     public JLabel getTitleLabel() {
@@ -303,8 +312,8 @@ public class Setup {
         return iterLabel;
     }
 
-    public JLabel getConfigLabel() {
-        return configLabel;
+    public JLabel getModelLabel() {
+        return modelLabel;
     }
 
     public JLabel getAdvancedLabel() {
@@ -327,8 +336,8 @@ public class Setup {
         return outputButton;
     }
 
-    public JButton getConfigButton() {
-        return configButton;
+    public JButton getModelButton() {
+        return modelButton;
     }
 
     public JTextField getInputField() {
@@ -347,8 +356,8 @@ public class Setup {
         return barcodeField;
     }
 
-    public JTextField getConfigField() {
-        return configField;
+    public JTextField getModelField() {
+        return modelField;
     }
 
     public JComboBox<Integer> getIterBox() {
