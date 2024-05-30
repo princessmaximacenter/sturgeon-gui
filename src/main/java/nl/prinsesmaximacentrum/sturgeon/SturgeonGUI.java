@@ -104,7 +104,8 @@ public class SturgeonGUI extends JFrame {
             @Override
             public void mouseClicked(MouseEvent e) {
                 ProcessBuilder pb = new ProcessBuilder();
-                pb.command("touch",  "/wrapper_stop.txt");
+                pb.command("touch", config.getWrapperFlagDir() + "/wrapper_stop.txt");
+                SturgeonGUI.this.running.showProcess();
             }
         });
     }

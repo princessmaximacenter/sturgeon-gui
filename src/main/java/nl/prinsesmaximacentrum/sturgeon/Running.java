@@ -30,6 +30,7 @@ public class Running {
             startLabel, endLabel, confLabel, cnvLabel, predLabel, guppyLabel, waitLabel;
     private JLabel[] flagOrder;
     private JButton outputButton;
+    private boolean stop = false;
     private Pattern iterPattern = Pattern.compile("iteration_[0-9]+");
     private String predictPlotPath = "", confidencePlotPath = "", confidenceTablePath = "", cnvPlotPath = "";
     private final String predictTile = "Prediction of Iteration ", confidenceTitle = "Confidence of Iteration ",
@@ -127,6 +128,8 @@ public class Running {
         String title = "Progress Iteration " + currentIteration;
         if (currentIteration == 0) {
             title = "Waiting for the first iteration";
+        } else if (stop){
+            title = "Finishing Iteration " + currentIteration + " and Stopping";
         }
         titleField.setText(title);
         displayPanel.add(processPanel);

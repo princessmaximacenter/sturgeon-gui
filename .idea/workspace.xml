@@ -4,16 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f93c3ae9-7d98-4a53-bdd0-e9713d67c61d" name="Changes" comment="updated the run pages and included tsv table">
+    <list default="true" id="f93c3ae9-7d98-4a53-bdd0-e9713d67c61d" name="Changes" comment="Added progress page">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/nl/prinsesmaximacentrum/sturgeon/Biomaterial.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/nl/prinsesmaximacentrum/sturgeon/Biomaterial.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/nl/prinsesmaximacentrum/sturgeon/Config.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/nl/prinsesmaximacentrum/sturgeon/Config.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/nl/prinsesmaximacentrum/sturgeon/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/nl/prinsesmaximacentrum/sturgeon/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/nl/prinsesmaximacentrum/sturgeon/Running.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/nl/prinsesmaximacentrum/sturgeon/Running.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/nl/prinsesmaximacentrum/sturgeon/Setup.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/nl/prinsesmaximacentrum/sturgeon/Setup.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/nl/prinsesmaximacentrum/sturgeon/SturgeonGUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/nl/prinsesmaximacentrum/sturgeon/SturgeonGUI.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/Config.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/Config.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -121,7 +115,15 @@
       <option name="project" value="LOCAL" />
       <updated>1713190825775</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Added progress page">
+      <option name="closed" value="true" />
+      <created>1714477947201</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1714477947201</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -129,6 +131,7 @@
     <MESSAGE value="made setup page" />
     <MESSAGE value="made running page" />
     <MESSAGE value="updated the run pages and included tsv table" />
-    <option name="LAST_COMMIT_MESSAGE" value="updated the run pages and included tsv table" />
+    <MESSAGE value="Added progress page" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added progress page" />
   </component>
 </project>
