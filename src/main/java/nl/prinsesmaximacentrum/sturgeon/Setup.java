@@ -26,10 +26,12 @@ public class Setup {
     private final double labelMultiplier = 0.01, titleMultiplier = 0.03, subtitleMultiplier = 0.015;
     private ColorConfig colorConfig;
     private Config config;
+    private Logger logger;
 
-    public Setup(ColorConfig colorConfig, Config config) {
+    public Setup(ColorConfig colorConfig, Config config, Logger logger) {
         this.colorConfig = colorConfig;
         this.config = config;
+        this.logger = logger;
         this.setLabels();
         this.setButtons();
         this.setTextFields();
@@ -270,6 +272,14 @@ public class Setup {
     }
 
     public boolean validateSetup() {
+        logger.addToLog("Validating setup with the following values:" +
+                "\ninput: " + this.inputField.getText() +
+                "\noutput: " + this.outputField.getText() +
+                "\nbarcode: " + this.barcodeField.getText() +
+                "\nbiomaterial: " + this.biomaterial.getBm() +
+                "\nUnclassified barcodes: " + this.classBox.getSelectedItem().toString() +
+                "\nNumber iterations: " + this.iterBox.getSelectedItem().toString() +
+                "\nModel: " + this.modelField.getText());
         for (String checkStr : new String[]{getBiomaterialID(), barcodeField.getText(), inputField.getText(),
                                             outputField.getText(), modelField.getText()}) {
             if (Objects.equals(checkStr, "")) {

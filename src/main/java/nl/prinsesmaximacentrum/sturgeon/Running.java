@@ -22,9 +22,10 @@ public class Running {
 
     private String inputFolder, outputFolder, barcode, biomaterial, modelFile;
     private boolean useUnclass;
-    private int numberInterations, currentIteration = 0;
+    private int numberIterations, currentIteration = 0;
     private JPanel displayPanel, processPanel;
     private JTextComponent logComponent;
+    private Logger logger;
     private JTextField titleField;
     private JLabel startBox, endBox, confBox, cnvBox, predBox, guppyBox, waitBox,
             startLabel, endLabel, confLabel, cnvLabel, predLabel, guppyLabel, waitLabel;
@@ -41,8 +42,9 @@ public class Running {
 
     public Running(String inputFolder, String outputFolder, String barcode,
                    String biomaterial, String modelFile, boolean useUnclass,
-                   int numberInterations, JTextComponent logComponent,
-                   JPanel displayPanel, Config config, Menu menu, ColorConfig colorConfig) {
+                   int numberIterations, JTextComponent logComponent,
+                   JPanel displayPanel, Config config, Menu menu, ColorConfig colorConfig,
+                   Logger logger) {
         this.config = config;
         this.colorConfig = colorConfig;
         this.menu = menu;
@@ -52,8 +54,9 @@ public class Running {
         this.biomaterial = biomaterial;
         this.modelFile = modelFile;
         this.useUnclass = useUnclass;
-        this.numberInterations = numberInterations;
+        this.numberIterations = numberIterations;
         this.logComponent = logComponent;
+        this.logger = logger;
         this.displayPanel = displayPanel;
         this.setTextFields();
         this.setProcessElements();
@@ -144,9 +147,11 @@ public class Running {
                     "-v " + outputFolder + ":/home/docker/output " +
                     "-v " + config.getRefGenome() + ":/home/docker/refGenome/ " +
                     "-v " + modelFile + ":/opt/sturgeon/sturgeon/include/models/model.zip " +
-                    "-v " + config.getWrapperFlagDir() + ":/home/docker/wrapper/" +
-                    config.getExtraArgs() +
-                    config.getSturgeonImage() + " " + config.getWrapperScript());
+                    "-v " + config.getWrapperFlagDir() + ":/home/docker/wrapper/ " +
+                    config.getExtraArgs() + " " +
+                    config.getSturgeonImage() + " " + config.getWrapperScript() +
+                    " --barcode " + barcode + " --useClassifiedBarcode " + !useUnclass +
+                    " --cnvFreq " + numberIterations);
             Process proc = pb.start();
 
             Thread outputReader = new Thread(() -> {
@@ -193,7 +198,7 @@ public class Running {
                 flagSet = true;
             } else {
                 if (flagSet) {
-                    if (currentIteration % numberInterations != 0 && Objects.equals(box, cnvBox)){
+                    if (currentIteration % numberIterations != 0 && Objects.equals(box, cnvBox)){
                         box.setBackground(Color.lightGray);
                     } else {
                         box.setBackground(Color.white);
@@ -355,7 +360,7 @@ public class Running {
             label.setFont(new Font("Arial", Font.PLAIN, (int) ceil((double) boxSize * 0.5)));
             label.setBackground(menu.getRunningButton().getBackground());
             label.setForeground(Color.black);
-            if (Objects.equals(label, cnvLabel) && currentIteration % numberInterations != 0) {
+            if (Objects.equals(label, cnvLabel) && currentIteration % numberIterations != 0) {
                 label.setForeground(Color.lightGray);
             }
             label.setOpaque(true);
@@ -381,6 +386,9 @@ public class Running {
     }
 
     private void log(String msg) {
-        this.logComponent.setText(this.logComponent.getText() + "\n> " + msg);
+        String backlog = String.join("\n",
+                Arrays.copyOfRange(this.logComponent.getText().split("\n"), 0, 100));
+        this.logComponent.setText(backlog + "\n> " + msg);
+        this.logger.addToLog(msg);
     }
 }
