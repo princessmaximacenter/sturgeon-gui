@@ -1,15 +1,16 @@
 package nl.prinsesmaximacentrum.sturgeon;
 
-import com.apple.eawt.Application;
+import java.awt.Taskbar;
 import com.fasterxml.jackson.core.exc.StreamReadException;
-import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -21,9 +22,7 @@ public class Main {
             public void run() {
                 try {
                     UIManager.setLookAndFeel( UIManager.getCrossPlatformLookAndFeelClassName());
-                    Application application = Application.getApplication();
-                    application.setDockIconImage(Toolkit.getDefaultToolkit().getImage(
-                            Paths.get("src/main/resources/icons/logo.png").toAbsolutePath().toString()));
+                    Main.setDockIcon();
                     final SturgeonGUI wnd = new SturgeonGUI(Main.getColorConfig(), Main.getConfig(), Main.getLogFile());
                     wnd.setVisible(true);
                 } catch (Exception e) {
@@ -35,22 +34,54 @@ public class Main {
         });
     }
 
-    private static ColorConfig getColorConfig() throws DatabindException, IOException, StreamReadException {
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        mapper.findAndRegisterModules();
-        return mapper.readValue(new File("src/main/resources/ColorConfig.yml"), ColorConfig.class);
+    private static void setDockIcon() {
+        if (Taskbar.isTaskbarSupported()) {
+            Taskbar taskbar = Taskbar.getTaskbar();
+            try {
+                taskbar.setIconImage(Main.getImageIcon());
+            } catch (UnsupportedOperationException e) {
+                System.err.println("The system does not support setting the icon image.");
+            } catch (SecurityException e) {
+                System.err.println("Security exception occurred while setting the icon image.");
+            } catch (IOException e) {
+                System.err.println("Failed to find dock icon");
+            }
+        }
     }
 
-    private static Config getConfig() throws DatabindException, IOException, StreamReadException {
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        mapper.findAndRegisterModules();
-        return mapper.readValue(new File("src/main/resources/Config.yml"), Config.class);
+    private static Image getImageIcon() throws IOException, RuntimeException {
+        InputStream imageStream = Main.class.getResourceAsStream("/icons/logo.png");
+        if (imageStream == null) {
+            throw new RuntimeException("Image not found: ");
+        }
+        return ImageIO.read(imageStream);
     }
 
-    private static String getLogFile() throws IOException {
-       File file = new File("src/main/resources/logs/log_" +
+    private static ColorConfig getColorConfig() throws IOException, StreamReadException {
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        mapper.findAndRegisterModules();
+        return mapper.readValue(Main.class.getResourceAsStream("/ColorConfig.yml"), ColorConfig.class);
+    }
+
+    private static Config getConfig() throws IOException, StreamReadException {
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        mapper.findAndRegisterModules();
+        return mapper.readValue(Main.class.getResourceAsStream("/Config.yml"), Config.class);
+    }
+
+    private static String getLogFile() throws IOException, NullPointerException {
+        // Define the directory where logs will be stored, e.g., a temporary directory
+        String logDirPath = System.getProperty("user.home") + "/.sturgeon_logs";
+        File logDir = new File(logDirPath);
+
+        // Create the directory if it doesn't exist
+        if (!logDir.exists()) {
+            logDir.mkdirs();
+        }
+
+        File file = new File(logDir, "/log_" +
                new SimpleDateFormat("yyMMdd_HHmmss").format(Calendar.getInstance().getTime()) + ".txt");
-       file.createNewFile();
-       return file.getAbsolutePath();
+        file.createNewFile();
+        return file.getAbsolutePath();
     }
 }

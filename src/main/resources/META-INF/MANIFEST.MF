@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Main-Class: nl.prinsesmaximacentrum.sturgeon.Main
+Start-Class: nl.prinsesmaximacentrum.sturgeon.Main
+Built-By: ${user.name}
+Build-Jdk: ${java.version}
+Created-By: Apache Maven ${maven.version}
+Spring-Boot-Version: 2.7.5
+Spring-Boot-Classes: BOOT-INF/classes/
+Spring-Boot-Lib: BOOT-INF/lib/
+Spring-Boot-Classpath-Index: BOOT-INF/classpath.idx
+Spring-Boot-Layers-Index: BOOT-INF/layers.idx
+

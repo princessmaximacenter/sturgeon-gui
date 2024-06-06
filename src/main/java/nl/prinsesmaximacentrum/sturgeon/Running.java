@@ -97,7 +97,6 @@ public class Running {
         this.outputButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                System.out.println(1);
                 if (Desktop.isDesktopSupported()) {
                     try {
                         Desktop.getDesktop().open(new File(outputFolder));
@@ -143,7 +142,7 @@ public class Running {
     public void run() {
         try {
             ProcessBuilder pb = new ProcessBuilder();
-            pb.command("docker", " run -it --rm --gpus all -v " + inputFolder + ":/home/docker/input " +
+            String command = " run -it --rm --gpus all -v " + inputFolder + ":/home/docker/input " +
                     "-v " + outputFolder + ":/home/docker/output " +
                     "-v " + config.getRefGenome() + ":/home/docker/refGenome/ " +
                     "-v " + modelFile + ":/opt/sturgeon/sturgeon/include/models/model.zip " +
@@ -151,7 +150,10 @@ public class Running {
                     config.getExtraArgs() + " " +
                     config.getSturgeonImage() + " " + config.getWrapperScript() +
                     " --barcode " + barcode + " --useClassifiedBarcode " + !useUnclass +
-                    " --cnvFreq " + numberIterations);
+                    " --cnvFreq " + numberIterations;
+            this.log("Starting sturgeon with the following call:\n" +
+                    "docker " + command);
+            pb.command("docker", command);
             Process proc = pb.start();
 
             Thread outputReader = new Thread(() -> {
@@ -161,7 +163,6 @@ public class Running {
                     while ((responseLine = reader.readLine()) != null) {
                         this.log(responseLine);
                         if (responseLine.contains("FLAG")) {
-                            System.out.println(responseLine);
                             this.setFlag(responseLine);
                             Matcher matcher = iterPattern.matcher(responseLine);
                             if (matcher.find()) {

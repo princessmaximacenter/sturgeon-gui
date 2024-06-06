@@ -22,15 +22,14 @@ public class Menu {
     }
 
     private void setIcons() {
-        String relativePath = "src/main/resources/icons/";
         this.setupIcon = new ImageIcon(
-                Paths.get(relativePath + "settings.png").toAbsolutePath().toString(),
+                Menu.class.getResource("/icons/settings.png"),
                 "Settings");
         this.runningIcon = new ImageIcon(
-                Paths.get( relativePath+ "running.png").toAbsolutePath().toString(),
+                Menu.class.getResource("/icons/running.png"),
                 "Running");
         this.stopIcon = new ImageIcon(
-                Paths.get( relativePath+ "stop.png").toAbsolutePath().toString(),
+                Menu.class.getResource("/icons/stop.png"),
                 "Stop");
     }
 
