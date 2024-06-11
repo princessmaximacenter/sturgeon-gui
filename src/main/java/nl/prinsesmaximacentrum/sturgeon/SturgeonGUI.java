@@ -1,15 +1,13 @@
 package nl.prinsesmaximacentrum.sturgeon;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Calendar;
 
 import static java.lang.Math.ceil;
 import static java.lang.Math.floor;
@@ -27,6 +25,7 @@ public class SturgeonGUI extends JFrame {
     private final int SETUP = 0, RUNNING = 1;
     private int activeScreen = 0;
     private Logger logger;
+    private JScrollPane terminalScroll;
 
     public SturgeonGUI(ColorConfig colorConfig, Config config, String logPath) {
         super();
@@ -57,7 +56,10 @@ public class SturgeonGUI extends JFrame {
         this.window = getContentPane();
         this.window.setLayout(new BorderLayout());
         this.window.setSize(new Dimension(800, 600));
-        this.window.setPreferredSize(Toolkit.getDefaultToolkit().getScreenSize());
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        this.window.setPreferredSize(new Dimension(
+                (int) floor(screenSize.width * 1),
+                (int) floor(screenSize.height * 0.90)));
         this.window.setBackground(this.colorConfig.getMenu());
         this.window.addComponentListener(new ComponentAdapter() {
             @Override
@@ -125,12 +127,14 @@ public class SturgeonGUI extends JFrame {
                 SturgeonGUI.this.addLoadingMessage(false, "START");
                 Setup setupOptions = SturgeonGUI.this.setupOptions;
                 JTextComponent log = SturgeonGUI.this.terminalArea;
-                if (SturgeonGUI.this.activeScreen == SturgeonGUI.this.SETUP &
-                        setupOptions.validateSetup()) {
-//                if (true) {
+//                if (SturgeonGUI.this.activeScreen == SturgeonGUI.this.SETUP &
+//                        setupOptions.validateSetup()) {
+                if (SturgeonGUI.this.activeScreen == SturgeonGUI.this.SETUP) {
                     SturgeonGUI.this.displayPanel.removeAll();
                     SturgeonGUI.this.setActiveScreen(SturgeonGUI.this.RUNNING);
+                    SturgeonGUI.this.menuItems.getSetupButton().setEnabled(false);
                     try {
+                        System.out.println("test3");
                         SturgeonGUI.this.running = new Running(setupOptions.getInputField().getText(),
                                 setupOptions.getOutputField().getText(),
                                 setupOptions.getBarcodeField().getText(),
@@ -139,7 +143,8 @@ public class SturgeonGUI extends JFrame {
                                 (boolean) setupOptions.getClassBox().getSelectedItem(),
                                 (int) setupOptions.getIterBox().getSelectedItem(),
                                 log, SturgeonGUI.this.displayPanel, SturgeonGUI.this.config, menuItems, colorConfig,
-                                SturgeonGUI.this.logger);
+                                SturgeonGUI.this.logger, SturgeonGUI.this.terminalScroll);
+                        log.setText(log.getText() + " \n> hi");
                         running.run();
                         SturgeonGUI.this.setSizes();
                         SturgeonGUI.this.running.showProcess();
@@ -154,23 +159,27 @@ public class SturgeonGUI extends JFrame {
                                 "Make sure you filled in everything, the output folder is empty and " +
                                 "you have given a correct biomaterial ID.");
                     } else {
+                        SturgeonGUI.this.setSizes();
+                        System.out.println("test1");
                         SturgeonGUI.this.running.showProcess();
                     }
                 }
+                System.out.println("test2");
                 SturgeonGUI.this.addLoadingMessage(true, "START");
             }
         });
     }
 
     private void addLoadingMessage(boolean finished, String step) {
-        if (!finished) {
-            SturgeonGUI.this.logger.addToLog("Loading " + step);
-            terminalArea.append( "\n> Loading...");
-        } else {
-            SturgeonGUI.this.logger.addToLog("Finished loading " + step);
-            terminalArea.append("\n> Finished loading.");
-        }
-
+        SwingUtilities.invokeLater(() -> {
+            if (!finished) {
+                SturgeonGUI.this.logger.addToLog("Loading " + step);
+                terminalArea.append("\n> Loading " + step + "...");
+            } else {
+                SturgeonGUI.this.logger.addToLog("Finished loading " + step);
+                terminalArea.append("\n> Finished loading.");
+            }
+        });
     }
 
     private void showSetup() {
@@ -187,19 +196,21 @@ public class SturgeonGUI extends JFrame {
         this.showSetup();
         this.workPanel.add(displayPanel);
 
-        this.terminalArea = new JTextArea("> Welcome to Sturgeon GUI v" + config.getVersion() +
-                "\n> Contact " + config.getDevMail() + " if you have any questions/feedback.\n> " +
-                "Please fill in the setup page to get started.");
+        this.terminalArea = new JTextArea();
         this.terminalArea.setBackground(this.colorConfig.getTerminal());
         this.terminalArea.setForeground(Color.GREEN);
         DefaultCaret caret = (DefaultCaret)this.terminalArea.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+        this.terminalArea.setText("> Welcome to Sturgeon GUI v" + config.getVersion() +
+                "\n> Contact " + config.getDevMail() + " if you have any questions/feedback.\n> " +
+                "Please fill in the setup page to get started.");
+        this.terminalScroll = new JScrollPane(this.terminalArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        this.terminalScroll.setBorder(BorderFactory.createEmptyBorder());
+        this.workPanel.add(this.terminalScroll);
 
-        JScrollPane scroll = new JScrollPane(this.terminalArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scroll.setBorder(BorderFactory.createEmptyBorder());
-        this.workPanel.add(scroll);
     }
+
 
     private void setSizes() {
         Rectangle size = this.window.getBounds();
@@ -221,17 +232,18 @@ public class SturgeonGUI extends JFrame {
         ));
         this.displayPanel.setBackground(this.getActiveColor());
 
-        this.terminalArea.setPreferredSize(new Dimension(
+        Dimension terminalDim = new Dimension(
                 workSize.width,
                 (int) floor(workSize.height * 0.2)
-        ));
+        );
+        this.terminalScroll.setPreferredSize(terminalDim);
         this.terminalArea.setFont(new Font("Arial", Font.PLAIN,
                 (int) ceil((size.width + size.height) * 0.007)));
 
         if (activeScreen == SETUP) {
             this.setupOptions.setSizes(displayPanel.getBounds());
         } else {
-            this.running.setSizes(displayPanel.getBounds());
+            this.running.setSizes();
         }
 
         this.revalidate();

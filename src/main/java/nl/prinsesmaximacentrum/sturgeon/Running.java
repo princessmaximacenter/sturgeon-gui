@@ -9,6 +9,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -25,17 +26,19 @@ public class Running {
     private int numberIterations, currentIteration = 0;
     private JPanel displayPanel, processPanel;
     private JTextComponent logComponent;
+    private JScrollPane logScroll;
     private Logger logger;
-    private JTextField titleField;
-    private JLabel startBox, endBox, confBox, cnvBox, predBox, guppyBox, waitBox,
+    private JLabel titleLabel, resultLabel,
+            startBox, endBox, confBox, cnvBox, predBox, guppyBox, waitBox,
             startLabel, endLabel, confLabel, cnvLabel, predLabel, guppyLabel, waitLabel;
     private JLabel[] flagOrder;
     private JButton outputButton;
     private boolean stop = false;
-    private Pattern iterPattern = Pattern.compile("iteration_[0-9]+");
+    private final String iterPrefix = "iteration_";
+    private final Pattern iterPattern = Pattern.compile(iterPrefix + "[0-9]+");
     private String predictPlotPath = "", confidencePlotPath = "", confidenceTablePath = "", cnvPlotPath = "";
-    private final String predictTile = "Prediction of Iteration ", confidenceTitle = "Confidence of Iteration ",
-                         cnvTitle = "CNV Plot Iteration ";
+    private final String predictTile = "Prediction of ", confidenceTitle = "Confidence of ",
+                         cnvTitle = "CNV Plot ";
     private Config config;
     private ColorConfig colorConfig;
     private Menu menu;
@@ -44,7 +47,7 @@ public class Running {
                    String biomaterial, String modelFile, boolean useUnclass,
                    int numberIterations, JTextComponent logComponent,
                    JPanel displayPanel, Config config, Menu menu, ColorConfig colorConfig,
-                   Logger logger) {
+                   Logger logger, JScrollPane logScroll) {
         this.config = config;
         this.colorConfig = colorConfig;
         this.menu = menu;
@@ -56,17 +59,35 @@ public class Running {
         this.useUnclass = useUnclass;
         this.numberIterations = numberIterations;
         this.logComponent = logComponent;
+        this.logScroll = logScroll;
         this.logger = logger;
         this.displayPanel = displayPanel;
-        this.setTextFields();
+        this.setTitle("");
+        this.setResultLabel("");
         this.setProcessElements();
     }
 
-    private void setTextFields() {
-        this.titleField = new JTextField("Waiting for the first iteration to finish...");
-        this.titleField.setBorder(BorderFactory.createEmptyBorder());
-        this.titleField.setForeground(Color.white);
+    private void setTitle(String title) {
+        if (this.titleLabel == null) {
+            this.titleLabel = new JLabel(title);
+            this.titleLabel.setBorder(BorderFactory.createEmptyBorder());
+            this.titleLabel.setForeground(Color.white);
+        } else {
+            SwingUtilities.invokeLater(() -> {
+                this.titleLabel.setText(title);
+            });
+        }
+    }
 
+    private void setResultLabel(String title) {
+        if (this.resultLabel == null) {
+            this.resultLabel = new JLabel(title);
+            this.resultLabel.setForeground(Color.white);
+        } else {
+            SwingUtilities.invokeLater(() -> {
+                this.resultLabel.setText(title);
+            });
+        }
     }
 
     private void setProcessElements() {
@@ -107,7 +128,7 @@ public class Running {
             }
         });
 
-        this.processPanel.add(titleField);
+        this.processPanel.add(titleLabel);
         this.processPanel.add(startBox);
         this.processPanel.add(startLabel);
         this.processPanel.add(waitBox);
@@ -127,33 +148,37 @@ public class Running {
 
     public void showProcess() {
         displayPanel.removeAll();
-        String title = "Progress Iteration " + currentIteration;
+        String title = "Running iteration " + currentIteration;
         if (currentIteration == 0) {
             title = "Waiting for the first iteration";
         } else if (stop){
-            title = "Finishing Iteration " + currentIteration + " and Stopping";
+            title = "Finishing iteration " + currentIteration + " and stopping";
         }
-        titleField.setText(title);
+        this.setTitle(title);
         displayPanel.add(processPanel);
-        displayPanel.revalidate();
-        displayPanel.repaint();
+        this.setSizes();
     }
 
     public void run() {
         try {
-            ProcessBuilder pb = new ProcessBuilder();
-            String command = " run -it --rm --gpus all -v " + inputFolder + ":/home/docker/input " +
-                    "-v " + outputFolder + ":/home/docker/output " +
-                    "-v " + config.getRefGenome() + ":/home/docker/refGenome/ " +
-                    "-v " + modelFile + ":/opt/sturgeon/sturgeon/include/models/model.zip " +
-                    "-v " + config.getWrapperFlagDir() + ":/home/docker/wrapper/ " +
-                    config.getExtraArgs() + " " +
-                    config.getSturgeonImage() + " " + config.getWrapperScript() +
-                    " --barcode " + barcode + " --useClassifiedBarcode " + !useUnclass +
-                    " --cnvFreq " + numberIterations;
+
+            String[] command = {
+                    "docker", "run", "--rm", "--gpus", "all",
+                    "-v", inputFolder + ":/home/docker/input",
+                    "-v", outputFolder + ":/home/docker/output",
+                    "-v", config.getRefGenome() + ":/home/docker/refGenome/",
+                    "-v", modelFile + ":/opt/sturgeon/sturgeon/include/models/model.zip",
+                    "-v", config.getWrapperFlagDir() + ":/home/docker/wrapper/",
+                    "-v", "/opt/docker/R_scripts/:/opt/sturgeon/R_scripts/",
+                    config.getSturgeonImage(),
+                    config.getWrapperScript(),
+                    "--barcode", barcode,
+                    "--useClassifiedBarcode", Boolean.toString(!useUnclass),
+                    "--cnvFreq", Integer.toString(numberIterations)};
+//            String command = "/bin/bash -c 'while IFS= read line; do sleep 1; echo $line; done < /Users/a.janse-3/Documents/testSturgeon/log_240607_130959.txt'";
             this.log("Starting sturgeon with the following call:\n" +
-                    "docker " + command);
-            pb.command("docker", command);
+                    String.join(" ", command));
+            ProcessBuilder pb = new ProcessBuilder(command);
             Process proc = pb.start();
 
             Thread outputReader = new Thread(() -> {
@@ -168,13 +193,15 @@ public class Running {
                             if (matcher.find()) {
                                 String iteration = matcher.group(0);
                                 this.setCurrentIteration(iteration);
-                                checkNewResults(iteration);
+                                this.checkNewResults();
                             }
                         }
                     }
                     this.log("Finished!");
                 } catch (IOException e) {
                     e.printStackTrace();
+                    this.log("ERROR: " + e.getMessage());
+                } catch (Exception e) {
                     this.log("ERROR: " + e.getMessage());
                 }
             });
@@ -194,9 +221,14 @@ public class Running {
                 (flagText.contains("completed") && Objects.equals(box, endBox)) ||
                 (flagText.contains("confidence") && Objects.equals(box, confBox)) ||
                 (flagText.contains("CNV") && Objects.equals(box, cnvBox)) ||
+                (flagText.contains("guppy") && Objects.equals(box, guppyBox)) ||
+                (flagText.contains("waiting 30 seconds") && Objects.equals(box, waitBox)) ||
                 (flagText.contains("sturgeon") && Objects.equals(box, predBox))) {
                 box.setBackground(Color.blue);
                 flagSet = true;
+                if (flagText.contains("completed")) {
+                    box.setBackground(Color.green);
+                }
             } else {
                 if (flagSet) {
                     if (currentIteration % numberIterations != 0 && Objects.equals(box, cnvBox)){
@@ -211,8 +243,8 @@ public class Running {
         }
     }
 
-    private void checkNewResults(String iteration) {
-        String iterationFolder = outputFolder + "/" + iteration + "/";
+    private void checkNewResults() {
+        String iterationFolder = outputFolder + "/" + iterPrefix + currentIteration + "/";
         List<List<String>> targets = Arrays.asList(
                 Arrays.asList(this.confidencePlotPath, iterationFolder + config.getConfidencePlot(), "confidencePlot"),
                 Arrays.asList(this.cnvPlotPath, iterationFolder + config.getCnvPlot(), "cnvPlot"),
@@ -221,11 +253,12 @@ public class Running {
         );
         for (List<String> targetStrings : targets) {
             String targetObject = targetStrings.get(0);
-            if (!targetObject.contains(iteration)) {
-                String filePath = targetStrings.get(1).replaceAll(iterPattern.pattern(), iteration);
+            if (!targetObject.contains(iterPrefix + currentIteration)) {
+                String filePath = targetStrings.get(1).replaceAll(iterPattern.pattern(),
+                        iterPrefix + currentIteration);
                 File targetFile = new File(filePath);
                 if (targetFile.exists() && !targetFile.isDirectory()) {
-                    setResultPath(targetStrings.get(2), filePath, iteration);
+                    setResultPath(targetStrings.get(2), filePath, iterPrefix + currentIteration);
                 }
             }
         }
@@ -235,6 +268,9 @@ public class Running {
         String[] iterationSplit = iteration.split("_");
         iteration = iterationSplit[iterationSplit.length - 1];
         this.currentIteration = Integer.parseInt(iteration);
+        if (this.titleLabel.getText().contains("Waiting")) {
+            this.setTitle("Running Iteration " + currentIteration);
+        }
     }
 
     private void setResultPath(String resultObject, String resultPath, String iteration) {
@@ -245,9 +281,11 @@ public class Running {
             } else if (Objects.equals(resultObject, "confidenceTable")) {
                 this.confidenceTablePath = resultPath;
             }
-            this.setActionButtons(this.menu.getConfidenceButton(),
-                    confidenceTitle + iteration,
-                    new String[]{this.confidenceTablePath, this.confidencePlotPath});
+            if (confidencePlotPath.contains("_"+iteration+".") && confidenceTablePath.contains("_"+iteration+".")) {
+                this.setActionButtons(this.menu.getConfidenceButton(),
+                        confidenceTitle + iteration,
+                        new String[]{this.confidenceTablePath, this.confidencePlotPath});
+            }
         } else if (Objects.equals(resultObject, "predictPlot")) {
             this.predictPlotPath = resultPath;
             this.setActionButtons(this.menu.getPredictionButton(),
@@ -267,9 +305,9 @@ public class Running {
             @Override
             public void mouseClicked(MouseEvent e) {
                 Running.this.displayPanel.setBackground(button.getBackground());
-                Running.this.titleField.setBackground(button.getBackground());
+                Running.this.titleLabel.setBackground(button.getBackground());
                 Running.this.showPlots(title, plotPaths);
-                Running.this.setSizes(Running.this.displayPanel.getBounds());
+                Running.this.setSizes();
                 Running.this.displayPanel.repaint();
                 Running.this.displayPanel.revalidate();
             }
@@ -278,47 +316,55 @@ public class Running {
 
     private void showPlots(String title, String[] plotPaths) {
         displayPanel.removeAll();
-        titleField.setText(title);
-        displayPanel.add(titleField);
+        resultLabel.setText(title);
+        displayPanel.add(resultLabel);
         try {
             for (String plotPath : plotPaths) {
                 if (plotPath.endsWith(".tsv")) {
                     TSVTable table = new TSVTable(plotPath);
                     displayPanel.add(table.getScrollPane());
                 } else {
-                    System.out.println(plotPath);
-                    BufferedImage plotImage = ImageIO.read(new File(plotPath));
-                    JLabel plotLabel = new JLabel(new ImageIcon(plotImage));
+                    BufferedImage plotImage = ImageIO.read(Files.newInputStream(new File(plotPath).toPath()));
+                    ImageIcon icon = new ImageIcon(plotImage);
+                    JLabel plotLabel = new JLabel(icon);
                     displayPanel.add(plotLabel);
                 }
             }
+            displayPanel.revalidate();
+            displayPanel.revalidate();
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.println("ERROR: " + e.getMessage());
+            String msg = "ERROR: " + e.getMessage();
+            this.log(msg);
+            System.err.println(msg);
         }
     }
 
-    private void setResultSizes(Rectangle size) {
+    private void setResultSizes() {
+        Rectangle size = displayPanel.getBounds();
         Component[] components = displayPanel.getComponents();
         boolean isPrediction = false;
         int counter = 0;
         for (Component component : components) {
             if (component instanceof JLabel || component instanceof JScrollPane) {
-                counter++;
-            } else if (component instanceof JTextField) {
-                component.setPreferredSize(new Dimension(
-                        size.width,
-                        (int) ceil(size.height * 0.1)
-                ));
-                component.setFont(new Font("Arial", Font.BOLD,
-                        (int) ceil((size.height + size.width) * 0.03)));
-                isPrediction = ((JTextField) component).getText().contains("Prediction");
+                if (!Objects.equals(component, resultLabel)) {
+                    counter++;
+                } else {
+                    resultLabel.setPreferredSize(new Dimension(
+                            size.width,
+                            (int) ceil(size.height * 0.1)
+                    ));
+                    resultLabel.setFont(new Font("Arial", Font.BOLD,
+                            (int) ceil((size.height + size.width) * 0.02)));
+                    isPrediction = (resultLabel).getText().contains("Prediction");
+                }
             }
         }
         int width, height;
         if (counter != 0) {
             for (Component component : components) {
-                if (component instanceof JLabel || component instanceof JScrollPane) {
+                if ((component instanceof JLabel || component instanceof JScrollPane) &&
+                        !Objects.equals(component, resultLabel)) {
                     if (isPrediction) {
                         width = (int) ceil(size.width * 0.95);
                         height = (int) ceil(size.height * 0.85);
@@ -340,7 +386,8 @@ public class Running {
         }
     }
 
-    private void setProcessSizes(Rectangle size) {
+    private void setProcessSizes() {
+        Rectangle size = displayPanel.getBounds();
         Rectangle panelSize = new Rectangle((int) floor((double) size.width / 2), size.height);
         processPanel.setPreferredSize(new Dimension(
                 panelSize.width,
@@ -366,30 +413,41 @@ public class Running {
             }
             label.setOpaque(true);
         }
-        titleField.setPreferredSize(new Dimension(panelSize.width, (int) floor((double) panelSize.height * 0.1)));
-        titleField.setFont(new Font("Arial", Font.BOLD, (int) ceil((double) boxSize * 0.7)));
-        titleField.setBackground(menu.getRunningButton().getBackground());
+        titleLabel.setPreferredSize(new Dimension(panelSize.width, (int) floor((double) panelSize.height * 0.1)));
+        titleLabel.setFont(new Font("Arial", Font.BOLD, (int) ceil((double) boxSize * 0.5)));
+        titleLabel.setBackground(menu.getRunningButton().getBackground());
         outputButton.setPreferredSize(new Dimension((int) ceil((double) labelSize * 0.5), boxSize));
         outputButton.setFont(new Font("Arial", Font.PLAIN, (int) ceil((double) boxSize * 0.4)));
         outputButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
     }
 
-    public void setSizes(Rectangle size) {
-        this.setResultSizes(size);
-        this.setProcessSizes(size);
+    public void setSizes() {
+        this.setResultSizes();
+        this.setProcessSizes();
+        this.processPanel.revalidate();
+        this.processPanel.repaint();
+        this.displayPanel.revalidate();
+        this.displayPanel.repaint();
     }
 
     private void setIconSize(JLabel label, int width, int height) {
         ImageIcon imageIcon = (ImageIcon) label.getIcon();
-        Image icon = imageIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
-        imageIcon = new ImageIcon(icon);
-        label.setIcon(imageIcon);
+        if (imageIcon != null) {
+            Image icon = imageIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+            imageIcon = new ImageIcon(icon);
+            label.setIcon(imageIcon);
+        }
     }
 
     private void log(String msg) {
-        String backlog = String.join("\n",
-                Arrays.copyOfRange(this.logComponent.getText().split("\n"), 0, 100));
-        this.logComponent.setText(backlog + "\n> " + msg);
-        this.logger.addToLog(msg);
+        SwingUtilities.invokeLater(() -> {
+            this.logger.addToLog(msg);
+
+            int horizontalScrollPosition = this.logScroll.getHorizontalScrollBar().getValue();
+            this.logComponent.setText(this.logComponent.getText() + "\n> " + msg);
+            this.logComponent.setCaretPosition(this.logComponent.getDocument().getLength());
+            this.logScroll.getHorizontalScrollBar().setValue(horizontalScrollPosition);
+            this.logScroll.getViewport().setViewPosition(new Point(0, this.logScroll.getViewport().getViewPosition().y));
+        });
     }
 }

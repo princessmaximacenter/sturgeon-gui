@@ -129,10 +129,10 @@ public class Setup {
     }
 
     private void setTextFields() {
-        this.inputField = new JTextField();
-        this.outputField = new JTextField();
+        this.inputField = new JTextField("/data/insilico_testing/data/20240228_DOCKER_TEST_PMC_live_48/no_sample/20240123_1221_X2_FAY20035_44a40cc0/pod5");
+        this.outputField = new JTextField("/data/insilico_testing/CNS_outputs/20240228_DOCKER_TEST_PMC_live_48");
         this.bmField = new JTextField();
-        this.barcodeField = new JTextField();
+        this.barcodeField = new JTextField("8");
         this.modelField = new JTextField(config.getModel());
 
         for (JTextField textField : new JTextField[]{inputField, outputField, modelField}){
