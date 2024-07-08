@@ -73,9 +73,7 @@ public class Running {
             this.titleLabel.setBorder(BorderFactory.createEmptyBorder());
             this.titleLabel.setForeground(Color.white);
         } else {
-            SwingUtilities.invokeLater(() -> {
-                this.titleLabel.setText(title);
-            });
+            this.titleLabel.setText(title);
         }
     }
 
@@ -159,26 +157,42 @@ public class Running {
         this.setSizes();
     }
 
+    public void stop() {
+        this.stop = true;
+    }
+
     public void run() {
         try {
 
-            String[] command = {
-                    "docker", "run", "--rm", "--gpus", "all",
-                    "-v", inputFolder + ":/home/docker/input",
-                    "-v", outputFolder + ":/home/docker/output",
-                    "-v", config.getRefGenome() + ":/home/docker/refGenome/",
-                    "-v", modelFile + ":/opt/sturgeon/sturgeon/include/models/model.zip",
-                    "-v", config.getWrapperFlagDir() + ":/home/docker/wrapper/",
-                    "-v", "/opt/docker/R_scripts/:/opt/sturgeon/R_scripts/",
-                    config.getSturgeonImage(),
-                    config.getWrapperScript(),
-                    "--barcode", barcode,
-                    "--useClassifiedBarcode", Boolean.toString(!useUnclass),
-                    "--cnvFreq", Integer.toString(numberIterations)};
+//            String[] command = {
+//                    "docker", "run", "--rm", "--gpus", "all",
+//                    "-v", inputFolder + ":/home/docker/input",
+//                    "-v", outputFolder + ":/home/docker/output",
+//                    "-v", config.getRefGenome() + ":/home/docker/refGenome/",
+//                    "-v", modelFile + ":/opt/sturgeon/sturgeon/include/models/model.zip",
+//                    "-v", config.getWrapperFlagDir() + ":/home/docker/wrapper/",
+//                    "-v", "/opt/docker/R_scripts/:/opt/sturgeon/R_scripts/",
+//                    config.getSturgeonImage(),
+//                    config.getWrapperScript(),
+//                    "--barcode", barcode,
+//                    "--cnvFreq", Integer.toString(numberIterations),
+//                    (!useUnclass) ? "--useClassifiedBarcode" : ""};
+            String command = "docker run --rm --gpus all " +
+                    "-v " + inputFolder + ":/home/docker/input " +
+                    "-v " + outputFolder + ":/home/docker/output " +
+                    "-v " + config.getRefGenome() + ":/home/docker/refGenome/ " +
+                    "-v " + modelFile + ":/opt/sturgeon/sturgeon/include/models/model.zip " +
+                    "-v " + config.getWrapperFlagDir() + ":/home/docker/wrapper/ " +
+                    "-v " + "/opt/docker/R_scripts/:/opt/sturgeon/R_scripts/ " +
+                    config.getSturgeonImage() + " '" +
+                    config.getWrapperScript() +
+                    " --barcode " + barcode +
+                    " --cnvFreq " + numberIterations +
+                    ((!useUnclass) ? " --useClassifiedBarcode'" : "'");
 //            String command = "/bin/bash -c 'while IFS= read line; do sleep 1; echo $line; done < /Users/a.janse-3/Documents/testSturgeon/log_240607_130959.txt'";
+            ProcessBuilder pb = new ProcessBuilder("/bin/bash", "-c", command);
             this.log("Starting sturgeon with the following call:\n" +
-                    String.join(" ", command));
-            ProcessBuilder pb = new ProcessBuilder(command);
+                    String.join(" ", pb.command()));
             Process proc = pb.start();
 
             Thread outputReader = new Thread(() -> {
@@ -197,7 +211,7 @@ public class Running {
                             }
                         }
                     }
-                    this.log("Finished!");
+                    this.log("Finished last iteration " + currentIteration + ".\nIt is safe now to close this program!");
                 } catch (IOException e) {
                     e.printStackTrace();
                     this.log("ERROR: " + e.getMessage());
@@ -267,7 +281,13 @@ public class Running {
     private void setCurrentIteration(String iteration) {
         String[] iterationSplit = iteration.split("_");
         iteration = iterationSplit[iterationSplit.length - 1];
-        this.currentIteration = Integer.parseInt(iteration);
+        if (this.currentIteration != Integer.parseInt(iteration)) {
+            this.currentIteration = Integer.parseInt(iteration);
+            cnvLabel.setForeground(Color.black);
+            if (Objects.equals(cnvLabel, cnvLabel) && currentIteration % numberIterations != 0) {
+                cnvLabel.setForeground(Color.lightGray);
+            }
+        }
         if (this.titleLabel.getText().contains("Waiting")) {
             this.setTitle("Running Iteration " + currentIteration);
         }
@@ -300,7 +320,6 @@ public class Running {
     }
 
     private void setActionButtons(JButton button, String title, String[] plotPaths) {
-        button.setEnabled(true);
         button.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -312,6 +331,7 @@ public class Running {
                 Running.this.displayPanel.revalidate();
             }
         });
+        button.setEnabled(true);
     }
 
     private void showPlots(String title, String[] plotPaths) {

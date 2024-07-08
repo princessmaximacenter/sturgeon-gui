@@ -7,6 +7,7 @@ import javax.swing.text.DefaultCaret;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.util.Arrays;
 
 import static java.lang.Math.ceil;
@@ -98,24 +99,36 @@ public class SturgeonGUI extends JFrame {
             }
         });
 
-        JButton runningButton = this.menuItems.getRunningButton();
+        JButton runningButton = menuItems.getRunningButton();
+        JButton stopButton = menuItems.getStopButton();
         this.menuPanel.add(runningButton);
         this.menuPanel.add(menuItems.getPredictionButton());
         this.menuPanel.add(menuItems.getConfidenceButton());
         this.menuPanel.add(menuItems.getCnvPlotButton());
-        this.menuPanel.add(menuItems.getStopButton());
+        this.menuPanel.add(stopButton);
         this.setRunningClick(runningButton);
+        this.setStopClick(stopButton);
     }
 
     private void setStopClick(JButton stopButton) {
+        stopButton.setEnabled(true);
         stopButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                SturgeonGUI.this.logger.addToLog("Clicked STOP button");
-                ProcessBuilder pb = new ProcessBuilder();
-                pb.command("touch", config.getWrapperFlagDir() + "/wrapper_stop.txt");
-                SturgeonGUI.this.running.showProcess();
-                SturgeonGUI.this.logger.addToLog("Completed loading STOP");
+                if (SturgeonGUI.this.activeScreen == SturgeonGUI.this.RUNNING) {
+                    try {
+                        SturgeonGUI.this.logger.addToLog("Clicked STOP button");
+                        ProcessBuilder pb = new ProcessBuilder("/bin/bash", "-c",
+                                "/bin/bash -c 'touch " + config.getWrapperFlagDir() + "/wrapper_stop.txt'");
+                        pb.start();
+                        SturgeonGUI.this.running.stop();
+                        SturgeonGUI.this.running.showProcess();
+                        stopButton.setEnabled(false);
+                        SturgeonGUI.this.logger.addToLog("Completed loading STOP");
+                    } catch (IOException err) {
+                        SturgeonGUI.this.logger.addToLog(err.getMessage());
+                    }
+                }
             }
         });
     }
@@ -127,9 +140,9 @@ public class SturgeonGUI extends JFrame {
                 SturgeonGUI.this.addLoadingMessage(false, "START");
                 Setup setupOptions = SturgeonGUI.this.setupOptions;
                 JTextComponent log = SturgeonGUI.this.terminalArea;
-//                if (SturgeonGUI.this.activeScreen == SturgeonGUI.this.SETUP &
-//                        setupOptions.validateSetup()) {
-                if (SturgeonGUI.this.activeScreen == SturgeonGUI.this.SETUP) {
+                if (SturgeonGUI.this.activeScreen == SturgeonGUI.this.SETUP &
+                        setupOptions.validateSetup()) {
+//                if (SturgeonGUI.this.activeScreen == SturgeonGUI.this.SETUP) {
                     SturgeonGUI.this.displayPanel.removeAll();
                     SturgeonGUI.this.setActiveScreen(SturgeonGUI.this.RUNNING);
                     SturgeonGUI.this.menuItems.getSetupButton().setEnabled(false);
@@ -174,10 +187,8 @@ public class SturgeonGUI extends JFrame {
         SwingUtilities.invokeLater(() -> {
             if (!finished) {
                 SturgeonGUI.this.logger.addToLog("Loading " + step);
-                terminalArea.append("\n> Loading " + step + "...");
             } else {
                 SturgeonGUI.this.logger.addToLog("Finished loading " + step);
-                terminalArea.append("\n> Finished loading.");
             }
         });
     }
