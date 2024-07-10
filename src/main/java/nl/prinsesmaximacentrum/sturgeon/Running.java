@@ -415,7 +415,7 @@ public class Running {
         ));
 
 
-        int boxSize = (int) floor((double) panelSize.width * 0.1);
+        int boxSize = (int) floor((double) panelSize.width * 0.09);
         int borderSize = (int) ceil((double) boxSize / 20);
         for(JLabel box: new JLabel[]{startBox, endBox, confBox, cnvBox, predBox, guppyBox, waitBox}){
             box.setPreferredSize(new Dimension(boxSize, boxSize));

@@ -1,8 +1,6 @@
 package nl.prinsesmaximacentrum.sturgeon;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
@@ -89,15 +87,7 @@ public class SturgeonGUI extends JFrame {
         this.menuItems = new Menu(colorConfig);
         JButton setupButton = this.menuItems.getSetupButton();
         this.menuPanel.add(setupButton);
-        setupButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                SturgeonGUI.this.addLoadingMessage(false, "SETUP");
-                SturgeonGUI.this.showSetup();
-                SturgeonGUI.this.setSizes();
-                SturgeonGUI.this.addLoadingMessage(true, "SETUP");
-            }
-        });
+        this.disableMenuButton(false);
 
         JButton runningButton = menuItems.getRunningButton();
         JButton stopButton = menuItems.getStopButton();
@@ -133,6 +123,26 @@ public class SturgeonGUI extends JFrame {
         });
     }
 
+    private void disableMenuButton(Boolean disable) {
+        JButton setupButton = this.menuItems.getSetupButton();
+        if (disable) {
+            setupButton.setEnabled(false);
+            setupButton.removeMouseListener(setupButton.getMouseListeners()[setupButton.getMouseListeners().length-1]);
+        } else {
+            setupButton.setEnabled(true);
+            setupButton.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    SturgeonGUI.this.addLoadingMessage(false, "SETUP");
+                    SturgeonGUI.this.showSetup();
+                    SturgeonGUI.this.setSizes();
+                    SturgeonGUI.this.addLoadingMessage(true, "SETUP");
+                }
+            });
+
+        }
+    }
+
     private void setRunningClick(JButton runningButton) {
         runningButton.addMouseListener(new MouseAdapter() {
             @Override
@@ -145,9 +155,8 @@ public class SturgeonGUI extends JFrame {
 //                if (SturgeonGUI.this.activeScreen == SturgeonGUI.this.SETUP) {
                     SturgeonGUI.this.displayPanel.removeAll();
                     SturgeonGUI.this.setActiveScreen(SturgeonGUI.this.RUNNING);
-                    SturgeonGUI.this.menuItems.getSetupButton().setEnabled(false);
+                    SturgeonGUI.this.disableMenuButton(true);
                     try {
-                        System.out.println("test3");
                         SturgeonGUI.this.running = new Running(setupOptions.getInputField().getText(),
                                 setupOptions.getOutputField().getText(),
                                 setupOptions.getBarcodeField().getText(),
@@ -157,7 +166,6 @@ public class SturgeonGUI extends JFrame {
                                 (int) setupOptions.getIterBox().getSelectedItem(),
                                 log, SturgeonGUI.this.displayPanel, SturgeonGUI.this.config, menuItems, colorConfig,
                                 SturgeonGUI.this.logger, SturgeonGUI.this.terminalScroll);
-                        log.setText(log.getText() + " \n> hi");
                         running.run();
                         SturgeonGUI.this.setSizes();
                         SturgeonGUI.this.running.showProcess();
@@ -173,11 +181,9 @@ public class SturgeonGUI extends JFrame {
                                 "you have given a correct biomaterial ID.");
                     } else {
                         SturgeonGUI.this.setSizes();
-                        System.out.println("test1");
                         SturgeonGUI.this.running.showProcess();
                     }
                 }
-                System.out.println("test2");
                 SturgeonGUI.this.addLoadingMessage(true, "START");
             }
         });
@@ -239,13 +245,13 @@ public class SturgeonGUI extends JFrame {
         Rectangle workSize = this.workPanel.getBounds();
         this.displayPanel.setPreferredSize(new Dimension(
                 workSize.width,
-                (int) ceil(workSize.height * 0.8)
+                (int) ceil(workSize.height * 0.7)
         ));
         this.displayPanel.setBackground(this.getActiveColor());
 
         Dimension terminalDim = new Dimension(
                 workSize.width,
-                (int) floor(workSize.height * 0.2)
+                (int) floor(workSize.height * 0.6)
         );
         this.terminalScroll.setPreferredSize(terminalDim);
         this.terminalArea.setFont(new Font("Arial", Font.PLAIN,

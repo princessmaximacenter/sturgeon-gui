@@ -74,7 +74,7 @@ public class Setup {
     private void setLabels() {
         this.titleLabel = new JLabel("Setup", JTextField.CENTER);
         this.inputLabel = new JLabel("Pod5 input folder", JTextField.RIGHT);
-        this.outputLabel = new JLabel("Result output folder", JTextField.RIGHT);
+        this.outputLabel = new JLabel("<HTML>Result output<p>folder</HTML>", JTextField.RIGHT);
         this.barcodeLabel = new JLabel("Used barcode", JTextField.RIGHT);
         this.bmLabel = new JLabel("Biomaterial ID", JTextField.RIGHT);
         this.classLabel = new JLabel("Use unclassified barcodes?", JTextField.RIGHT);
@@ -111,7 +111,8 @@ public class Setup {
                 public void mouseClicked(MouseEvent e){
                     String buttonText = button.getText();
                     TargetFinder finder = new TargetFinder(Setup.this.getTextField(buttonText),
-                            (!buttonText.contains("class=config")));
+                            (!buttonText.contains("class=config")),
+                            Setup.this.config.getDefaultDir());
                     finder.start();
                 }
             });
@@ -129,10 +130,10 @@ public class Setup {
     }
 
     private void setTextFields() {
-        this.inputField = new JTextField("/data/insilico_testing/data/20240228_DOCKER_TEST_PMC_live_48/no_sample/20240123_1221_X2_FAY20035_44a40cc0/pod5");
-        this.outputField = new JTextField("/data/insilico_testing/CNS_outputs/20240228_DOCKER_TEST_PMC_live_48");
+        this.inputField = new JTextField();
+        this.outputField = new JTextField();
         this.bmField = new JTextField();
-        this.barcodeField = new JTextField("8");
+        this.barcodeField = new JTextField();
         this.modelField = new JTextField(config.getModel());
 
         for (JTextField textField : new JTextField[]{inputField, outputField, modelField}){

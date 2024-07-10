@@ -3,7 +3,7 @@ package nl.prinsesmaximacentrum.sturgeon;
 public class Config {
 
     private String cnvPlot, confidencePlot, predictPlot, confidenceTable, version, devMail, refGenome,
-    model, sturgeonImage, wrapperScript, extraArgs, wrapperFlagDir;
+    model, sturgeonImage, wrapperScript, extraArgs, wrapperFlagDir, defaultDir;
 
     public String getCnvPlot() {
         return cnvPlot;
@@ -99,5 +99,13 @@ public class Config {
 
     public void setWrapperFlagDir(String wrapperFlagDir) {
         this.wrapperFlagDir = wrapperFlagDir;
+    }
+
+    public String getDefaultDir() {
+        return defaultDir;
+    }
+
+    public void setDefaultDir(String defaultDir) {
+        this.defaultDir = defaultDir;
     }
 }
