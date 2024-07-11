@@ -392,7 +392,7 @@ public class Running {
                         if (counter == 1) {
                             counter = 2;
                         }
-                        width = (int) ceil(size.width * ((double) 1 / (counter * 1.1)));
+                        width = (int) ceil(size.width * ((double) 1 / (counter * 1.1)) * 0.80);
                         height = width;
                     }
 

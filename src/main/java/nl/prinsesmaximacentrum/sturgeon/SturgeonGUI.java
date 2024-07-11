@@ -251,7 +251,7 @@ public class SturgeonGUI extends JFrame {
 
         Dimension terminalDim = new Dimension(
                 workSize.width,
-                (int) floor(workSize.height * 0.6)
+                (int) floor(workSize.height * 0.3)
         );
         this.terminalScroll.setPreferredSize(terminalDim);
         this.terminalArea.setFont(new Font("Arial", Font.PLAIN,
