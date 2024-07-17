@@ -72,7 +72,10 @@ public class Running {
             this.titleLabel.setBorder(BorderFactory.createEmptyBorder());
             this.titleLabel.setForeground(Color.white);
         } else {
-            this.titleLabel.setText(title);
+            if (!this.titleLabel.getText().contains("Finishing iteration")) {
+                this.titleLabel.setText(title);
+                this.titleLabel.repaint();
+            }
         }
     }
 
@@ -162,20 +165,6 @@ public class Running {
 
     public void run() {
         try {
-
-//            String[] command = {
-//                    "docker", "run", "--rm", "--gpus", "all",
-//                    "-v", inputFolder + ":/home/docker/input",
-//                    "-v", outputFolder + ":/home/docker/output",
-//                    "-v", config.getRefGenome() + ":/home/docker/refGenome/",
-//                    "-v", modelFile + ":/opt/sturgeon/sturgeon/include/models/model.zip",
-//                    "-v", config.getWrapperFlagDir() + ":/home/docker/wrapper/",
-//                    "-v", "/opt/docker/R_scripts/:/opt/sturgeon/R_scripts/",
-//                    config.getSturgeonImage(),
-//                    config.getWrapperScript(),
-//                    "--barcode", barcode,
-//                    "--cnvFreq", Integer.toString(numberIterations),
-//                    (!useUnclass) ? "--useClassifiedBarcode" : ""};
             String command = "docker run --rm --gpus all " +
                     "-v " + inputFolder + ":/home/docker/input " +
                     "-v " + outputFolder + ":/home/docker/output " +
@@ -188,7 +177,7 @@ public class Running {
                     " --barcode " + barcode +
                     " --cnvFreq " + numberIterations +
                     ((!useUnclass) ? " --useClassifiedBarcode'" : "'");
-//            String command = "/bin/bash -c 'while IFS= read line; do sleep 1; echo $line; done < /Users/a.janse-3/Documents/testSturgeon/log_240607_130959.txt'";
+//            String command = "/bin/bash -c 'while IFS= read line; do sleep 1; echo $line; done < /Users/a.janse-3/Documents/testSturgeon/log_240716_162906.txt'";
             ProcessBuilder pb = new ProcessBuilder("/bin/bash", "-c", command);
             this.log("Starting sturgeon with the following call:\n" +
                     String.join(" ", pb.command()));
@@ -207,6 +196,7 @@ public class Running {
                                 String iteration = matcher.group(0);
                                 this.setCurrentIteration(iteration);
                                 this.checkNewResults();
+                                this.resetScreen();
                             }
                         }
                     }
@@ -287,9 +277,7 @@ public class Running {
                 cnvLabel.setForeground(Color.lightGray);
             }
         }
-        if (this.titleLabel.getText().contains("Waiting")) {
-            this.setTitle("Running Iteration " + currentIteration);
-        }
+        this.setTitle("Running Iteration " + currentIteration);
     }
 
     private void setResultPath(String resultObject, String resultPath, String iteration) {
@@ -302,18 +290,18 @@ public class Running {
             }
             if (confidencePlotPath.contains("_"+iteration+".") && confidenceTablePath.contains("_"+iteration+".")) {
                 this.setActionButtons(this.menu.getConfidenceButton(),
-                        confidenceTitle + iteration,
+                        confidenceTitle + iteration.replace("_", " "),
                         new String[]{this.confidenceTablePath, this.confidencePlotPath});
             }
         } else if (Objects.equals(resultObject, "predictPlot")) {
             this.predictPlotPath = resultPath;
             this.setActionButtons(this.menu.getPredictionButton(),
-                    predictTile + iteration,
+                    predictTile + iteration.replace("_", " "),
                     new String[]{this.predictPlotPath});
         } else {
             this.cnvPlotPath = resultPath;
             this.setActionButtons(this.menu.getCnvPlotButton(),
-                    cnvTitle + iteration,
+                    cnvTitle + iteration.replace("_", " "),
                     new String[]{this.cnvPlotPath});
         }
     }
@@ -443,6 +431,10 @@ public class Running {
     public void setSizes() {
         this.setResultSizes();
         this.setProcessSizes();
+        this.resetScreen();
+    }
+
+    public void resetScreen() {
         this.processPanel.revalidate();
         this.processPanel.repaint();
         this.displayPanel.revalidate();

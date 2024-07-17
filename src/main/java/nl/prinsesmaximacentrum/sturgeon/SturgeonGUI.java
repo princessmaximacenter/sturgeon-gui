@@ -158,7 +158,6 @@ public class SturgeonGUI extends JFrame {
                 JTextComponent log = SturgeonGUI.this.terminalArea;
                 if (SturgeonGUI.this.activeScreen == SturgeonGUI.this.SETUP &
                         setupOptions.validateSetup()) {
-//                if (SturgeonGUI.this.activeScreen == SturgeonGUI.this.SETUP) {
                     String outputFolder = setupOptions.getOutputField().getText() + "/" + setupOptions.getRunNameField().getText();
                     SturgeonGUI.this.logger.addToLog("Creating folder: " + outputFolder);
                     new File(outputFolder).mkdirs();

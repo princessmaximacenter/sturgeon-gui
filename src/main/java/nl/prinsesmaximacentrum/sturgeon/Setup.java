@@ -261,7 +261,6 @@ public class Setup {
             }
         }
         return !Files.exists(Paths.get(outputField.getText() + "/" + this.runNameField.getText()));
-
     }
 
     public JLabel getTitleLabel() {
