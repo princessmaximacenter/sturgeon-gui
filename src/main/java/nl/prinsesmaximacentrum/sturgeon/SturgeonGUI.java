@@ -41,12 +41,17 @@ public class SturgeonGUI extends JFrame {
     }
 
     private void setClosure() {
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                SturgeonGUI.this.setVisible(false);
-                SturgeonGUI.this.dispose();
+                if (SturgeonGUI.this.activeScreen == SturgeonGUI.this.RUNNING & !SturgeonGUI.this.terminalArea.getText().contains("It is safe now to close this program!")) {
+                    setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+                    JOptionPane.showMessageDialog(null, "Please wait till it is safe to close this program!");
+                } else {
+                    setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+                    SturgeonGUI.this.setVisible(false);
+                    SturgeonGUI.this.dispose();
+                }
             }
         });
     }
