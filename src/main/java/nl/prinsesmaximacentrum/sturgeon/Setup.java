@@ -16,13 +16,12 @@ import static java.lang.Math.ceil;
 
 public class Setup {
 
-    private JLabel titleLabel, inputLabel, outputLabel, barcodeLabel, bmLabel, classLabel, iterLabel, modelLabel,
-            advancedLabel, emptyBarcodeLabel, emptyBmLabel;
+    private JLabel titleLabel, inputLabel, outputLabel, barcodeLabel, runNameLabel, classLabel, iterLabel, modelLabel,
+            advancedLabel, emptyBarcodeLabel, emptyRunLabel;
     private JButton inputButton, outputButton, modelButton;
-    private JTextField inputField, outputField, bmField, barcodeField, modelField;
+    private JTextField inputField, outputField, runNameField, barcodeField, modelField;
     private JComboBox<Integer> iterBox;
     private JComboBox<Boolean> classBox;
-    private Biomaterial biomaterial = new Biomaterial();
     private final double labelMultiplier = 0.01, titleMultiplier = 0.03, subtitleMultiplier = 0.015;
     private ColorConfig colorConfig;
     private Config config;
@@ -54,16 +53,16 @@ public class Setup {
         container.add(classLabel);
         container.add(classBox);
 
-        container.add(barcodeLabel);
-        container.add(barcodeField);
-        container.add(emptyBarcodeLabel);
+        container.add(runNameLabel);
+        container.add(runNameField);
+        container.add(emptyRunLabel);
 
         container.add(iterLabel);
         container.add(iterBox);
 
-        container.add(bmLabel);
-        container.add(bmField);
-        container.add(emptyBmLabel);
+        container.add(barcodeLabel);
+        container.add(barcodeField);
+        container.add(emptyBarcodeLabel);
 
         container.add(modelLabel);
         container.add(modelField);
@@ -74,18 +73,18 @@ public class Setup {
     private void setLabels() {
         this.titleLabel = new JLabel("Setup", JTextField.CENTER);
         this.inputLabel = new JLabel("Pod5 input folder", JTextField.RIGHT);
-        this.outputLabel = new JLabel("<HTML>Result output<p>folder</HTML>", JTextField.RIGHT);
+        this.outputLabel = new JLabel("Result location", JTextField.RIGHT);
         this.barcodeLabel = new JLabel("Used barcode", JTextField.RIGHT);
-        this.bmLabel = new JLabel("Biomaterial ID", JTextField.RIGHT);
+        this.runNameLabel = new JLabel("Output folder", JTextField.RIGHT);
         this.classLabel = new JLabel("Use unclassified barcodes?", JTextField.RIGHT);
         this.iterLabel = new JLabel("<HTML>Number of iterations<p>before new CNV</HTML>", JTextField.RIGHT);
         this.modelLabel = new JLabel("Prediction Model", JTextField.RIGHT);
         this.advancedLabel = new JLabel("------Advanced options------", JTextField.CENTER);
         this.emptyBarcodeLabel = new JLabel();
-        this.emptyBmLabel = new JLabel();
+        this.emptyRunLabel = new JLabel();
 
-        for (JLabel label : new JLabel[]{titleLabel, inputLabel, outputLabel, barcodeLabel, bmLabel, classLabel,
-                iterLabel, modelLabel, advancedLabel, emptyBarcodeLabel, emptyBmLabel}) {
+        for (JLabel label : new JLabel[]{titleLabel, inputLabel, outputLabel, barcodeLabel, runNameLabel, classLabel,
+                iterLabel, modelLabel, advancedLabel, emptyBarcodeLabel, emptyRunLabel}) {
             label.setForeground(Color.LIGHT_GRAY);
 //            label.setBorder(BorderFactory.createLineBorder(Color.RED, 3));
         }
@@ -132,37 +131,16 @@ public class Setup {
     private void setTextFields() {
         this.inputField = new JTextField();
         this.outputField = new JTextField();
-        this.bmField = new JTextField();
+        this.runNameField = new JTextField();
         this.barcodeField = new JTextField();
         this.modelField = new JTextField(config.getModel());
 
-        for (JTextField textField : new JTextField[]{inputField, outputField, modelField}){
+        for (JTextField textField : new JTextField[]{inputField, outputField, modelField, runNameField}){
             textField.setHorizontalAlignment(SwingConstants.LEFT);
         }
-        for (JTextField textField : new JTextField[]{bmField, barcodeField}){
+        for (JTextField textField : new JTextField[]{barcodeField}){
             textField.setHorizontalAlignment(SwingConstants.CENTER);
         }
-
-        this.bmField.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                updateBm(bmField.getText());
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                updateBm(bmField.getText());
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                updateBm(bmField.getText());
-            }
-
-            private void updateBm(String text) {
-                Setup.this.biomaterial.setBm(text);
-            }
-        });
     }
 
     private void setComboBoxes() {
@@ -185,7 +163,7 @@ public class Setup {
 
     private void setLabelSizes(Rectangle size){
         double fontSize = (double) size.height + size.width;
-        for (JLabel label : new JLabel[]{inputLabel, outputLabel, barcodeLabel, bmLabel, modelLabel,
+        for (JLabel label : new JLabel[]{inputLabel, outputLabel, barcodeLabel, runNameLabel, modelLabel,
                                          classLabel, iterLabel}) {
             label.setPreferredSize(new Dimension(
                     (int) ceil(size.width * 0.16),
@@ -201,7 +179,7 @@ public class Setup {
                     (int) ceil(size.height * 0.2)
             ));
         }
-        for (JLabel label : new JLabel[]{emptyBarcodeLabel, emptyBmLabel}) {
+        for (JLabel label : new JLabel[]{emptyBarcodeLabel, emptyRunLabel}) {
             label.setPreferredSize(new Dimension(
                     (int) ceil(size.width * 0.1),
                     (int) ceil(size.height * 0.15)
@@ -229,7 +207,7 @@ public class Setup {
 
     private void setFieldSizes(Rectangle size) {
         double fontSize = (double) size.height + size.width;
-        for (JTextField field : new JTextField[]{inputField, outputField, bmField, barcodeField, modelField}) {
+        for (JTextField field : new JTextField[]{inputField, outputField, runNameField, barcodeField, modelField}) {
             field.setPreferredSize(new Dimension(
                     (int) ceil(size.width * 0.15),
                     (int) ceil(size.height * 0.1)
@@ -268,31 +246,22 @@ public class Setup {
         }
     }
 
-    public String getBiomaterialID() {
-        return biomaterial.getBm();
-    }
-
     public boolean validateSetup() {
         logger.addToLog("Validating setup with the following values:" +
                 "\ninput: " + this.inputField.getText() +
-                "\noutput: " + this.outputField.getText() +
+                "\noutput: " + this.outputField.getText() + "/" + this.runNameField.getText() +
                 "\nbarcode: " + this.barcodeField.getText() +
-                "\nbiomaterial: " + this.biomaterial.getBm() +
                 "\nUnclassified barcodes: " + this.classBox.getSelectedItem().toString() +
                 "\nNumber iterations: " + this.iterBox.getSelectedItem().toString() +
                 "\nModel: " + this.modelField.getText());
-        for (String checkStr : new String[]{getBiomaterialID(), barcodeField.getText(), inputField.getText(),
+        for (String checkStr : new String[]{runNameField.getText(), barcodeField.getText(), inputField.getText(),
                                             outputField.getText(), modelField.getText()}) {
             if (Objects.equals(checkStr, "")) {
                 return false;
             }
         }
-        try {
-            return biomaterial.isBmValid(biomaterial.getBm()) &&
-                    !Files.list(Paths.get(outputField.getText())).findAny().isPresent();
-        } catch (IOException e ) {
-            return false;
-        }
+        return !Files.exists(Paths.get(outputField.getText() + "/" + this.runNameField.getText()));
+
     }
 
     public JLabel getTitleLabel() {
@@ -311,8 +280,8 @@ public class Setup {
         return barcodeLabel;
     }
 
-    public JLabel getBmLabel() {
-        return bmLabel;
+    public JLabel getRunNameLabel() {
+        return runNameLabel;
     }
 
     public JLabel getClassLabel() {
@@ -335,8 +304,8 @@ public class Setup {
         return emptyBarcodeLabel;
     }
 
-    public JLabel getEmptyBmLabel() {
-        return emptyBmLabel;
+    public JLabel getEmptyRunLabel() {
+        return emptyRunLabel;
     }
 
     public JButton getInputButton() {
@@ -359,8 +328,8 @@ public class Setup {
         return outputField;
     }
 
-    public JTextField getBmField() {
-        return bmField;
+    public JTextField getRunNameField() {
+        return runNameField;
     }
 
     public JTextField getBarcodeField() {
@@ -377,10 +346,6 @@ public class Setup {
 
     public JComboBox<Boolean> getClassBox() {
         return classBox;
-    }
-
-    public Biomaterial getBiomaterial() {
-        return biomaterial;
     }
 
     public double getLabelMultiplier() {

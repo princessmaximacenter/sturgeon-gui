@@ -21,7 +21,7 @@ import static java.lang.Math.floor;
 
 public class Running {
 
-    private String inputFolder, outputFolder, barcode, biomaterial, modelFile;
+    private String inputFolder, outputFolder, barcode, modelFile;
     private boolean useUnclass;
     private int numberIterations, currentIteration = 0;
     private JPanel displayPanel, processPanel;
@@ -44,7 +44,7 @@ public class Running {
     private Menu menu;
 
     public Running(String inputFolder, String outputFolder, String barcode,
-                   String biomaterial, String modelFile, boolean useUnclass,
+                   String modelFile, boolean useUnclass,
                    int numberIterations, JTextComponent logComponent,
                    JPanel displayPanel, Config config, Menu menu, ColorConfig colorConfig,
                    Logger logger, JScrollPane logScroll) {
@@ -54,7 +54,6 @@ public class Running {
         this.inputFolder = inputFolder;
         this.outputFolder = outputFolder;
         this.barcode = barcode;
-        this.biomaterial = biomaterial;
         this.modelFile = modelFile;
         this.useUnclass = useUnclass;
         this.numberIterations = numberIterations;

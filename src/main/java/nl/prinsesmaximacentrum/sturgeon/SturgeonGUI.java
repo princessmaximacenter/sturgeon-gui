@@ -5,6 +5,7 @@ import javax.swing.text.DefaultCaret;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -158,14 +159,16 @@ public class SturgeonGUI extends JFrame {
                 if (SturgeonGUI.this.activeScreen == SturgeonGUI.this.SETUP &
                         setupOptions.validateSetup()) {
 //                if (SturgeonGUI.this.activeScreen == SturgeonGUI.this.SETUP) {
+                    String outputFolder = setupOptions.getOutputField().getText() + "/" + setupOptions.getRunNameField().getText();
+                    SturgeonGUI.this.logger.addToLog("Creating folder: " + outputFolder);
+                    new File(outputFolder).mkdirs();
                     SturgeonGUI.this.displayPanel.removeAll();
                     SturgeonGUI.this.setActiveScreen(SturgeonGUI.this.RUNNING);
                     SturgeonGUI.this.disableMenuButton(true);
                     try {
                         SturgeonGUI.this.running = new Running(setupOptions.getInputField().getText(),
-                                setupOptions.getOutputField().getText(),
+                                outputFolder,
                                 setupOptions.getBarcodeField().getText(),
-                                setupOptions.getBiomaterial().getBm(),
                                 setupOptions.getModelField().getText(),
                                 (boolean) setupOptions.getClassBox().getSelectedItem(),
                                 (int) setupOptions.getIterBox().getSelectedItem(),
@@ -182,8 +185,7 @@ public class SturgeonGUI extends JFrame {
                     if (SturgeonGUI.this.activeScreen == SturgeonGUI.this.SETUP) {
                         SturgeonGUI.this.logger.addToLog("Validation of the setup has failed");
                         log.setText(log.getText() + "\n> Validation of the setup has failed!\n" +
-                                "Make sure you filled in everything, the output folder is empty and " +
-                                "you have given a correct biomaterial ID.");
+                                "Make sure you filled in everything and the output folder doesn't exist yet.");
                     } else {
                         SturgeonGUI.this.setSizes();
                         SturgeonGUI.this.running.showProcess();
