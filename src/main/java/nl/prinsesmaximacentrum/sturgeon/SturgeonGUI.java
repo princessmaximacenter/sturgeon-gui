@@ -23,7 +23,7 @@ public class SturgeonGUI extends JFrame {
     private Setup setupOptions;
     private Running running;
     private final int SETUP = 0, RUNNING = 1;
-    private int activeScreen = 0;
+    private int activeScreen = 0, confirmStop = 1;
     private Logger logger;
     private JScrollPane terminalScroll;
 
@@ -32,8 +32,8 @@ public class SturgeonGUI extends JFrame {
         this.colorConfig = colorConfig;
         this.config = config;
         this.logger = new Logger(logPath);
-        this.logger.addToLog("Sturgeon v" + this.config.getVersion() + " started");
-        this.setTitle("Sturgeon v" + this.config.getVersion());
+        this.logger.addToLog("Sturgeon GUI v" + this.config.getVersion() + " started");
+        this.setTitle("Sturgeon GUI v" + this.config.getVersion());
         this.setClosure();
         this.setWindow();
         this.buildGUI();
@@ -114,12 +114,16 @@ public class SturgeonGUI extends JFrame {
                 if (SturgeonGUI.this.activeScreen == SturgeonGUI.this.RUNNING) {
                     try {
                         SturgeonGUI.this.logger.addToLog("Clicked STOP button");
-                        ProcessBuilder pb = new ProcessBuilder("/bin/bash", "-c",
-                                "/bin/bash -c 'touch " + config.getWrapperFlagDir() + "/wrapper_stop.txt'");
-                        pb.start();
-                        SturgeonGUI.this.running.stop();
-                        SturgeonGUI.this.running.showProcess();
-                        stopButton.setEnabled(false);
+                        SturgeonGUI.this.confirmStop = JOptionPane.showConfirmDialog(null,
+                                "Are you sure you want to stop?", "Stop?", JOptionPane.YES_NO_OPTION);
+                        if (SturgeonGUI.this.confirmStop == 0) {
+                            ProcessBuilder pb = new ProcessBuilder("/bin/bash", "-c",
+                                    "/bin/bash -c 'touch " + config.getWrapperFlagDir() + "/wrapper_stop.txt'");
+                            pb.start();
+                            SturgeonGUI.this.running.stop();
+                            SturgeonGUI.this.running.showProcess();
+                            stopButton.setEnabled(false);
+                        }
                         SturgeonGUI.this.logger.addToLog("Completed loading STOP");
                     } catch (IOException err) {
                         SturgeonGUI.this.logger.addToLog(err.getMessage());
@@ -174,6 +178,7 @@ public class SturgeonGUI extends JFrame {
                                 log, SturgeonGUI.this.displayPanel, SturgeonGUI.this.config, menuItems, colorConfig,
                                 SturgeonGUI.this.logger, SturgeonGUI.this.terminalScroll);
                         running.run();
+                        SturgeonGUI.this.menuItems.getRunningButton().setText("Progress");
                         SturgeonGUI.this.setSizes();
                         SturgeonGUI.this.running.showProcess();
                     } catch (NullPointerException err) {
