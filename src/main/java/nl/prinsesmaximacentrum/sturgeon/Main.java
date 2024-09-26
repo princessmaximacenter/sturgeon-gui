@@ -23,7 +23,8 @@ public class Main {
                 try {
                     UIManager.setLookAndFeel( UIManager.getCrossPlatformLookAndFeelClassName());
                     Main.setDockIcon();
-                    final SturgeonGUI wnd = new SturgeonGUI(Main.getColorConfig(), Main.getConfig(), Main.getLogFile());
+                    Config config = Main.getConfig();
+                    final SturgeonGUI wnd = new SturgeonGUI(Main.getColorConfig(), config, Main.getLogFile(config));
                     wnd.setVisible(true);
                 } catch (Exception e) {
                     System.out.println("ERROR:");
@@ -69,9 +70,9 @@ public class Main {
         return mapper.readValue(Main.class.getResourceAsStream("/Config.yml"), Config.class);
     }
 
-    private static String getLogFile() throws IOException, NullPointerException {
+    private static String getLogFile(Config config) throws IOException, NullPointerException {
         // Define the directory where logs will be stored, e.g., a temporary directory
-        String logDirPath = System.getProperty("user.home") + "/.sturgeon_logs";
+        String logDirPath = config.getLogDir();
         File logDir = new File(logDirPath);
 
         // Create the directory if it doesn't exist
