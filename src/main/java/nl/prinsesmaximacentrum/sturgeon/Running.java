@@ -181,6 +181,7 @@ public class Running {
             ProcessBuilder pb = new ProcessBuilder("/bin/bash", "-c", command);
             this.log("Starting sturgeon with the following call:\n" +
                     String.join(" ", pb.command()));
+            pb.redirectErrorStream(true);
             Process proc = pb.start();
 
             Thread outputReader = new Thread(() -> {

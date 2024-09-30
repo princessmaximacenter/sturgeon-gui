@@ -164,7 +164,15 @@ public class SturgeonGUI extends JFrame {
                         setupOptions.validateSetup()) {
                     String outputFolder = setupOptions.getOutputField().getText() + "/" + setupOptions.getRunNameField().getText();
                     SturgeonGUI.this.logger.addToLog("Creating folder: " + outputFolder);
-                    new File(outputFolder).mkdirs();
+                    File dir = new File(outputFolder);
+                    if (dir.mkdirs()) {
+                        // Set the permissions to 775
+                        dir.setReadable(true, false);  // Readable by everyone
+                        dir.setWritable(true, false);  // Writable by group and owner
+                        dir.setExecutable(true, false);  // Executable by everyone
+                    } else {
+                        SturgeonGUI.this.logger.addToLog("Directory creation failed.");
+                    }
                     SturgeonGUI.this.displayPanel.removeAll();
                     SturgeonGUI.this.setActiveScreen(SturgeonGUI.this.RUNNING);
                     SturgeonGUI.this.disableMenuButton(true);
