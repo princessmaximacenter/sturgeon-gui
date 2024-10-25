@@ -7,13 +7,15 @@ showing the latest plots/table, as well as signaling Sturgeon to stop.
 ### System requirements
 **Hardware:**
 - NVIDIA CUDA graphics card
-- Linux OS
+- GridION (not a hard requirement but used during development/testing)
 
 **Software:**
 - Docker
 - [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
   - Make sure to validate the installation `sudo docker run --rm --gpus all nvidia/cuda:11.0.3-base-ubuntu20.04 nvidia-smi`
 - Java 11
+- Bash
+- Linux OS
 
 ### Configuration
 The configurations can be found in the following file: `src/main/resources/Config.yml`
