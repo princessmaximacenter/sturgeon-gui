@@ -57,10 +57,19 @@ java -jar target/sturgeon-gui.jar
 ```
 
 ### Hints and known bugs:
+- Due to hardware limitations of the GridION OS, only one sample can run at the time. This GUI has been made with this in mind.
 - The layout of the GUI is not always stable. Usually resizing or restarting the GUI helps.
 - The GUI and the docker back-end are not directly linked. Meaning if the GUI crashes or is forced quit, the container will keep running. Manually stop the container if needed.
 - It is currently not possible to restart the GUI once a run is finished. For now just close the GUI and start it again.
 - Check the log in the logDir (see config) for hints if errors have occurred.
+
+### Workflow
+Color meaning:
+- Grey = Lab process defined outside this repository.
+- Blue = User interacting with the GUI as defined in the [UserManual](doc/UserManual.pdf).
+- Red = GUI processes.
+
+![Sturgeon GUI workflow](doc/img/workflow_gui.png "GUI workflow")
 
 ### Contact
 Maintained by the Translation Bioinformatics group
