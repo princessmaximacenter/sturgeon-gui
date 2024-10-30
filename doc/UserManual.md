@@ -7,12 +7,16 @@
 3. [How to use?](#how-to-use)
 4. [FAQ](#faq)
 
+<div style="page-break-after: always;"></div>
+
 ### Description
 This document contains information on how to install and use the Sturgeon GUI tool. To help the readability of this 
 document, colors are used to highlight 
 <span style="background-color: black; color:orange"><b>buttons</b></span>,
 <span style="background-color: black; color:lightblue"><b>labels</b></span> and
 <span style="background-color: black; color:lightgreen"><b>panels</b></span>.
+
+<div style="page-break-after: always;"></div>
 
 ## How to install?
 1. Login using your credentials in Gridion
@@ -25,6 +29,8 @@ select <span style="background-color: black; color:orange"><b>this computer</b><
 5. Select your <span style="background-color: black; color:orange"><b>Desktop</b></span>  folder and click 
 <span style="background-color: black; color:orange"><b>select</b></span>  in the top right corner.
 6. A copy of the file should now appear on your desktop which you can double-click to start the application.
+
+<div style="page-break-after: always;"></div>
 
 ## How to use?
 
@@ -53,7 +59,12 @@ of the tool. Here you can find instructions, progression and warning/errors that
 <span style="background-color: black; color:lightgreen"><b>Log</b></span>. Here you can find the page of the currently 
 selected page as selected in the <span style="background-color: black; color:lightgreen"><b>Menu</b></span>.
 
+<div style="page-break-after: always;"></div>
+
 ### 2. Setup
+
+![Setup page](img/setup_page.png)
+
 Every time you want to start a run you have to fill in the following:
 * <span style="background-color: black; color:lightblue"><b>Pod5 input folder</b></span>:  folder location where the Gridion 
 writes the pod5 files to. You can use the <span style="background-color: black; color:orange"><b>Choose Folder</b></span> 
@@ -81,11 +92,16 @@ If everything is filled in you can press Start. If the
 <span style="background-color: black; color:lightgreen"><b>Log</b></span> panel if there is an error regarding the input 
 values and change accordingly. 
 
+<div style="page-break-after: always;"></div>
+
 ### 3. Progress
+![progress page](img/progres_page.png)
 If the input values of the setup are approved, the 
 <span style="background-color: black; color:lightgreen"><b>Display</b></span> will show the 
 <span style="background-color: black; color:orange"><b>Progress</b></span> page which shows at which step it is at and which 
 iteration is running. 
+
+![result page](img/result_page.png)
 When plots are generated, the corresponding buttons will be activated in the 
 <span style="background-color: black; color:lightgreen"><b>Menu</b></span> which you can click on to see the corresponding 
 plots/tables.
@@ -97,7 +113,12 @@ If you wish to see previous plots, go to <span style="background-color: black; c
 on the <span style="background-color: black; color:orange"><b>Result folder</b></span> button. 
 This opens a file explorer to the output folder where you can find folders per iteration which contains the plot files.
 
+<div style="page-break-after: always;"></div>
+
 ### 4. Stop
+![confirm stop](img/confirm_stop.png)
+![finish](img/finishing_run.png)
+![ready to quit](img/ready_2_close.png)
 When you are ready to finish the run, do the following:
 1. Stop the GridION sequence run (not required persé but good practice)
 2. Click on the <span style="background-color: black; color:orange"><b>Stop</b></span> button and confirm you want to stop. 
@@ -111,8 +132,12 @@ shutdown (<span style="background-color: black; color:orange"><b>x</b></span>) b
 program and repeat the steps in this document.**
 <br>
 <br>
+
+<div style="page-break-after: always;"></div>
+
 ### FAQ
 **q. It won't allow me to shut down the application.**   
+![quit error](img/close_while_finishing.png)
 **a.**  When pressing <span style="background-color: black; color:orange"><b>Start</b></span>, the application is locked until 
 the classifier has stopped. We do this to prevent the classifier to be running in the background while the front-end is 
 closed, leading to potential issues when another run is started. To stop the application, please press 
@@ -120,7 +145,8 @@ closed, leading to potential issues when another run is started. To stop the app
 <span style="background-color: black; color:lightgreen"><b>Log</b></span> panel tells you it is safe to close it. If for some 
 reason it is not stopping, contact the Translational Bioinformatics Team ([TranslationalBioinf@prinsesmaximacentrum.nl](mailto:TranslationalBioinf@prinsesmaximacentrum.nl)).
 
-**q. The application looks all messed up on start up.**     
+**q. The application looks all messed up on start up.**  
+![messed up gui](img/messed_up_gui.png)
 **a.**  It can happen that the <span style="background-color: black; color:orange"><b>Setup</b></span> page looks weird with 
 labels and fields not being in the right place. This is a random bug that sometime appears. In such case you can just 
 shut down and restart the program. Otherwise, try to resize the screen. If it is still messed up please contact the 
