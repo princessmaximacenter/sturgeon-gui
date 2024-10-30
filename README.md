@@ -40,6 +40,7 @@ Currently only supports live_processing_fast5s_guppy_v6.5.R
 check if it is already running or if it needs to stop. 
 - **defaultDir**: Default directory to open the file explorer add when choosing the input pod5 folder.
 - **logDir**: Directory (host) to write the log files to.
+- **samplePattern**: Regex pattern to which a sample ID needs to adhere to. (Currently not being used) 
 
 ### How to install
 Requirements:

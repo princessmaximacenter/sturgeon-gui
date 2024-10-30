@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import java.awt.*;
 
+/**
+ * Class containing all the colors used throughout the application
+ */
 public class ColorConfig {
 
     @JsonDeserialize(using = ColorDeserializer.class)

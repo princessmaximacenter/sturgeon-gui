@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class to convert a TSV table to a swagger object
+ */
 public class TSVTable {
 
     private DefaultTableModel tableModel;

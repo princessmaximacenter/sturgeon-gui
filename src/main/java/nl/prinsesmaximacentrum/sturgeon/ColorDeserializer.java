@@ -6,6 +6,9 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import java.io.IOException;
 
+/**
+ * Class to turn a string into a Color object
+ */
 public class ColorDeserializer extends StdDeserializer<Color> {
 
     public ColorDeserializer() {
@@ -16,6 +19,13 @@ public class ColorDeserializer extends StdDeserializer<Color> {
         super(vc);
     }
 
+    /**
+     * Method to convert a csv string into a color object
+     * @param jp: Input json containing the csv string
+     * @param ctxt: Object given by the JsonDeserialize tag
+     * @return Color object
+     * @throws IOException In case something is wrong with the csv string
+     */
     @Override
     public Color deserialize(JsonParser jp, DeserializationContext ctxt)
             throws IOException {

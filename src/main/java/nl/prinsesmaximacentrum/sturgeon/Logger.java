@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+/**
+ * A logging class to add and format strings to the given log file
+ */
 public class Logger {
 
     private String logPath;

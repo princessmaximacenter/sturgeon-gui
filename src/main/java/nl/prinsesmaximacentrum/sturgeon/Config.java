@@ -3,7 +3,7 @@ package nl.prinsesmaximacentrum.sturgeon;
 public class Config {
 
     private String cnvPlot, confidencePlot, predictPlot, confidenceTable, version, devMail, refGenome,
-    model, sturgeonImage, wrapperScript, extraArgs, wrapperFlagDir, defaultDir, logDir;
+    model, sturgeonImage, wrapperScript, extraArgs, wrapperFlagDir, defaultDir, logDir, samplePattern;
 
     public String getCnvPlot() {
         return cnvPlot;
@@ -115,5 +115,13 @@ public class Config {
 
     public void setLogDir(String logDir) {
         this.logDir = logDir;
+    }
+
+    public String getSamplePattern() {
+        return samplePattern;
+    }
+
+    public void setSamplePattern(String samplePattern) {
+        this.samplePattern = samplePattern;
     }
 }

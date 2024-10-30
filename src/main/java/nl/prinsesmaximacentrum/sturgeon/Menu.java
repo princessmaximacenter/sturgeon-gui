@@ -8,6 +8,9 @@ import java.nio.file.Paths;
 
 import static java.lang.Math.ceil;
 
+/**
+ * Class to create menu buttons
+ */
 public class Menu {
 
     private JButton setupButton, runningButton, predictionButton, cnvPlotButton, confidenceButton,

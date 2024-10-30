@@ -19,6 +19,9 @@ import java.util.regex.Pattern;
 import static java.lang.Math.ceil;
 import static java.lang.Math.floor;
 
+/**
+ * Class for calling the sturgeon back-end and showing pages to the users regarding progress and results.
+ */
 public class Running {
 
     private String inputFolder, outputFolder, barcode, modelFile;
@@ -43,6 +46,22 @@ public class Running {
     private ColorConfig colorConfig;
     private Menu menu;
 
+    /**
+     * Init of the Running class
+     * @param inputFolder: Path to the pod5 input folder
+     * @param outputFolder: Path where sturgeon needs to write its output to
+     * @param barcode: Barcode used in the library prep
+     * @param modelFile: Path to the sturgeon model
+     * @param useUnclass: If true, don't hard filter reads that do not match the barcode
+     * @param numberIterations: How many sequencing iterations before making a CNV?
+     * @param logComponent: Object to write the log to
+     * @param displayPanel: What panel to display the current page on
+     * @param config: Config object with all paths used throughout the application
+     * @param menu: Menu object to change the buttons looks and behaviour when needed
+     * @param colorConfig: Config containing the colors used
+     * @param logger: Logger object to write messages to
+     * @param logScroll: ScrollPane to set the position of the scrolls
+     */
     public Running(String inputFolder, String outputFolder, String barcode,
                    String modelFile, boolean useUnclass,
                    int numberIterations, JTextComponent logComponent,
@@ -163,6 +182,9 @@ public class Running {
         this.stop = true;
     }
 
+    /**
+     * Method to call the docker command and check if it is still running
+     */
     public void run() {
         try {
             String command = "docker run --rm --gpus all " +
@@ -177,7 +199,6 @@ public class Running {
                     " --barcode " + barcode +
                     " --cnvFreq " + numberIterations +
                     ((!useUnclass) ? " --useClassifiedBarcode'" : "'");
-//            String command = "/bin/bash -c 'while IFS= read line; do sleep 1; echo $line; done < /Users/a.janse-3/Documents/testSturgeon/log_240716_162906.txt'";
             ProcessBuilder pb = new ProcessBuilder("/bin/bash", "-c", command);
             this.log("Starting sturgeon with the following call:\n" +
                     String.join(" ", pb.command()));
@@ -218,6 +239,10 @@ public class Running {
 
     }
 
+    /**
+     * Method to tell the user which step sturgeon is at.
+     * @param flagText: A sturgeon log line that contains a FLAG part
+     */
     private void setFlag(String flagText) {
         boolean flagSet = false;
         for (JLabel box : this.flagOrder) {
@@ -307,6 +332,12 @@ public class Running {
         }
     }
 
+    /**
+     * Method to adjust the action behind the results buttons
+     * @param button: JButton to adjust
+     * @param title: Title of the page when clicking on the button
+     * @param plotPaths: Path to the plot/table to show on the page
+     */
     private void setActionButtons(JButton button, String title, String[] plotPaths) {
         button.addMouseListener(new MouseAdapter() {
             @Override

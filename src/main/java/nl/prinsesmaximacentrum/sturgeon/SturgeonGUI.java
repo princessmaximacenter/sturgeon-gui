@@ -12,6 +12,9 @@ import java.util.Arrays;
 import static java.lang.Math.ceil;
 import static java.lang.Math.floor;
 
+/**
+ * Class for building the Sturgeon GUI
+ */
 public class SturgeonGUI extends JFrame {
 
     private Container window;
@@ -27,6 +30,12 @@ public class SturgeonGUI extends JFrame {
     private Logger logger;
     private JScrollPane terminalScroll;
 
+    /**
+     * SturgeonGUI init
+     * @param colorConfig: config class of the colors used in the GUI
+     * @param config: config class of paths and strings used throughout the application
+     * @param logPath: path to the log file
+     */
     public SturgeonGUI(ColorConfig colorConfig, Config config, String logPath) {
         super();
         this.colorConfig = colorConfig;
@@ -41,6 +50,9 @@ public class SturgeonGUI extends JFrame {
         this.pack();
     }
 
+    /**
+     * Method to adjust the behaviour when the user request to close the app.
+     */
     private void setClosure() {
         addWindowListener(new WindowAdapter() {
             @Override
@@ -57,6 +69,9 @@ public class SturgeonGUI extends JFrame {
         });
     }
 
+    /**
+     * Method to configure the main window
+     */
     private void setWindow() {
         this.window = getContentPane();
         this.window.setLayout(new BorderLayout());
@@ -74,6 +89,9 @@ public class SturgeonGUI extends JFrame {
         });
     }
 
+    /**
+     * Method to set the layout of the main frame
+     */
     private void buildGUI() {
         this.logger.addToLog("Building GUI");
         this.menuPanel = new JPanel(new GridLayout(6,1));
@@ -89,11 +107,14 @@ public class SturgeonGUI extends JFrame {
 
     }
 
+    /**
+     * Method so add buttons to the menu panel
+     */
     private void setMenuItems() {
         this.menuItems = new Menu(colorConfig);
         JButton setupButton = this.menuItems.getSetupButton();
         this.menuPanel.add(setupButton);
-        this.disableMenuButton(false);
+        this.disableSetupButton(false);
 
         JButton runningButton = menuItems.getRunningButton();
         JButton stopButton = menuItems.getStopButton();
@@ -106,6 +127,11 @@ public class SturgeonGUI extends JFrame {
         this.setStopClick(stopButton);
     }
 
+    /**
+     * Method to set the action when clicking the stop button in the menu.
+     * User should not be able to close when sturgeon is still running.
+     * @param stopButton: JButton to add the action to
+     */
     private void setStopClick(JButton stopButton) {
         stopButton.setEnabled(true);
         stopButton.addMouseListener(new MouseAdapter() {
@@ -133,7 +159,11 @@ public class SturgeonGUI extends JFrame {
         });
     }
 
-    private void disableMenuButton(Boolean disable) {
+    /**
+     * Method to disable/enable the setup button when the run has started
+     * @param disable: if true, disable setup button. if false, enable setup button
+     */
+    private void disableSetupButton(Boolean disable) {
         JButton setupButton = this.menuItems.getSetupButton();
         if (disable) {
             setupButton.setEnabled(false);
@@ -153,6 +183,11 @@ public class SturgeonGUI extends JFrame {
         }
     }
 
+    /**
+     * Add the action behind the start/running button.
+     * When pressed the setup is validated and will try to call sturgeon using the Running object.
+     * @param runningButton: JButton to add the action to
+     */
     private void setRunningClick(JButton runningButton) {
         runningButton.addMouseListener(new MouseAdapter() {
             @Override
@@ -175,7 +210,7 @@ public class SturgeonGUI extends JFrame {
                     }
                     SturgeonGUI.this.displayPanel.removeAll();
                     SturgeonGUI.this.setActiveScreen(SturgeonGUI.this.RUNNING);
-                    SturgeonGUI.this.disableMenuButton(true);
+                    SturgeonGUI.this.disableSetupButton(true);
                     try {
                         SturgeonGUI.this.running = new Running(setupOptions.getInputField().getText(),
                                 outputFolder,
@@ -208,6 +243,11 @@ public class SturgeonGUI extends JFrame {
         });
     }
 
+    /**
+     * Adds additional debug lines to the log
+     * @param finished: if true, log the step has succeeded else mention it is still loading.
+     * @param step: Step in progress this log message is about.
+     */
     private void addLoadingMessage(boolean finished, String step) {
         SwingUtilities.invokeLater(() -> {
             if (!finished) {
@@ -218,6 +258,9 @@ public class SturgeonGUI extends JFrame {
         });
     }
 
+    /**
+     * Method to show the setup page to the user
+     */
     private void showSetup() {
         this.setActiveScreen(SETUP);
         this.displayPanel.removeAll();
@@ -226,6 +269,10 @@ public class SturgeonGUI extends JFrame {
         this.repaint();
     }
 
+    /**
+     * Method to configure the workPanel with a panel to display the plots/setting/etc and to display
+     * the terminal/log panel.
+     */
     private void setWorkSubPanels() {
         this.displayPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         this.setupOptions = new Setup(colorConfig, config, logger);
@@ -248,6 +295,9 @@ public class SturgeonGUI extends JFrame {
     }
 
 
+    /**
+     * Method the set the sizes of the elements in the gui based on the current screen size.
+     */
     private void setSizes() {
         Rectangle size = this.window.getBounds();
         this.menuPanel.setPreferredSize(new Dimension(
@@ -286,6 +336,10 @@ public class SturgeonGUI extends JFrame {
         this.repaint();
     }
 
+    /**
+     * Method to choose which color to use based on the current activate state of the app
+     * @return Color object
+     */
     private Color getActiveColor() {
         if (this.activeScreen == this.SETUP) {
             return colorConfig.getSetup();
@@ -294,6 +348,10 @@ public class SturgeonGUI extends JFrame {
         }
     }
 
+    /**
+     * Method to change the activeScreen flag to tell which stage the app is at
+     * @param screen: int of the stage to set
+     */
     private void setActiveScreen(int screen) {
         this.activeScreen = screen;
     }

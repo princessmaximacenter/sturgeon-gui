@@ -14,6 +14,9 @@ import java.util.Objects;
 
 import static java.lang.Math.ceil;
 
+/**
+ * Class to create elements for the setup page.
+ */
 public class Setup {
 
     private JLabel titleLabel, inputLabel, outputLabel, barcodeLabel, runNameLabel, classLabel, iterLabel, modelLabel,
@@ -86,7 +89,6 @@ public class Setup {
         for (JLabel label : new JLabel[]{titleLabel, inputLabel, outputLabel, barcodeLabel, runNameLabel, classLabel,
                 iterLabel, modelLabel, advancedLabel, emptyBarcodeLabel, emptyRunLabel}) {
             label.setForeground(Color.LIGHT_GRAY);
-//            label.setBorder(BorderFactory.createLineBorder(Color.RED, 3));
         }
     }
 

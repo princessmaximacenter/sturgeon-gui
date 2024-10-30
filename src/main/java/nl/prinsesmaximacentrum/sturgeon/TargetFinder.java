@@ -7,6 +7,9 @@ import java.nio.file.Paths;
 
 import static javax.swing.JFileChooser.APPROVE_OPTION;
 
+/**
+ * Class to find files and folders based on the user input
+ */
 public class TargetFinder extends Thread {
 
     private JFileChooser fileChooser;
